@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://vhews5o0b0s8"]
+
+[ext_resource type="Texture2D" uid="uid://caudrtlf5uccl" path="res://environment/RockPack128x128.png" id="1_fiy3q"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_tpfd5"]
+radius = 15.0
+
+[node name="Rock" type="StaticBody2D"]
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_fiy3q")
+region_enabled = true
+region_rect = Rect2(64.9684, 62.8636, 30.9357, 24.191)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CapsuleShape2D_tpfd5")
