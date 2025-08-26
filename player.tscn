@@ -755,7 +755,7 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_someid"]
-size = Vector2(128, 128)
+size = Vector2(99, 92)
 
 [node name="Player" type="CharacterBody2D" groups=["player"]]
 script = ExtResource("1_4flbx")
@@ -780,6 +780,7 @@ collision_layer = 8
 collision_mask = 4
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AttackHitbox"]
+position = Vector2(-0.5, 1)
 shape = SubResource("RectangleShape2D_someid")
 disabled = true
 

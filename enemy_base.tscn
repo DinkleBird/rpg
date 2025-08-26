@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://b1v1i38b6b7vc" path="res://downloads/Tiny RPG Character Asset Pack v1.03 -Free Soldier&Orc/Characters(100x100)/Orc/Orc/Orc-Walk.png" id="6_gak77"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_edvsq"]
+radius = 15.0
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_3vlx0"]
 atlas = ExtResource("2_ehd03")
@@ -151,7 +152,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_ynmqp")
 }],
-"loop": true,
+"loop": false,
 "name": &"attack_1",
 "speed": 5.0
 }, {
@@ -174,7 +175,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_javna")
 }],
-"loop": true,
+"loop": false,
 "name": &"attack_2",
 "speed": 5.0
 }, {
@@ -249,7 +250,6 @@ animations = [{
 }]
 
 [node name="enemy_base" type="CharacterBody2D" groups=["enemy"]]
-scale = Vector2(3, 3)
 script = ExtResource("1_8nqel")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
@@ -261,3 +261,13 @@ animation = &"walk_right"
 
 [node name="HealthComponent" type="Node" parent="."]
 script = ExtResource("4_health")
+
+[node name="AttackRange" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AttackRange"]
+shape = SubResource("CircleShape2D_edvsq")
+
+[node name="AttackCooldownTimer" type="Timer" parent="."]
+one_shot = true
