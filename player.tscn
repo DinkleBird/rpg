@@ -16,7 +16,7 @@
 [ext_resource type="Texture2D" uid="uid://bhxpp7ppbqwny" path="res://downloads/FREE_Adventurer 2D Pixel Art/Sprites/RUN/run_up.png" id="13_7lmhl"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_i3pqv"]
-radius = 19.0
+radius = 11.0
 height = 38.0
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ivps1"]
@@ -754,14 +754,14 @@ animations = [{
 "speed": 5.0
 }]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_someid"]
-size = Vector2(99, 92)
+[sub_resource type="CircleShape2D" id="CircleShape2D_bwjto"]
+radius = 50.2494
 
 [node name="Player" type="CharacterBody2D" groups=["player"]]
 script = ExtResource("1_4flbx")
 metadata/_edit_horizontal_guides_ = [-130.0]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." groups=["player"]]
 shape = SubResource("CapsuleShape2D_i3pqv")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
@@ -780,8 +780,7 @@ collision_layer = 8
 collision_mask = 4
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AttackHitbox"]
-position = Vector2(-0.5, 1)
-shape = SubResource("RectangleShape2D_someid")
+shape = SubResource("CircleShape2D_bwjto")
 disabled = true
 
 [node name="AttackTimer" type="Timer" parent="."]

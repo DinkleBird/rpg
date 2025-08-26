@@ -20,11 +20,14 @@ func _ready():
 
 # A function to deal damage.
 func take_damage(damage_amount):
+	print(damage_amount, " damage")
 	if _current_health <= 0:
 		return # Already dead, do nothing.
 	
 	# Decrease health by the damage amount.
 	_current_health -= damage_amount
+	print(get_parent())
+	print(_current_health)
 	
 	# Clamp the value to ensure it never goes below zero.
 	_current_health = clamp(_current_health, 0, max_health)
