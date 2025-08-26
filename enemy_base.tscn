@@ -1,18 +1,263 @@
-[gd_scene load_steps=4 format=3 uid="uid://7btmust8ydkn"]
+[gd_scene load_steps=40 format=3 uid="uid://7btmust8ydkn"]
 
 [ext_resource type="Script" uid="uid://jpmx2qkty7ch" path="res://enemy.gd" id="1_8nqel"]
-[ext_resource type="Texture2D" uid="uid://ch0w6u34nvxek" path="res://downloads/Tiny RPG Character Asset Pack v1.03 -Free Soldier&Orc/Characters(100x100)/Orc/Orc/Orc-Idle.png" id="2_edvsq"]
+[ext_resource type="Texture2D" uid="uid://br0iosvgmwomv" path="res://downloads/Tiny RPG Character Asset Pack v1.03 -Free Soldier&Orc/Characters(100x100)/Orc/Orc/Orc-Attack01.png" id="2_ehd03"]
+[ext_resource type="Texture2D" uid="uid://ch0w6u34nvxek" path="res://downloads/Tiny RPG Character Asset Pack v1.03 -Free Soldier&Orc/Characters(100x100)/Orc/Orc/Orc-Idle.png" id="2_idle"]
+[ext_resource type="Texture2D" uid="uid://dk5hevcxagmq5" path="res://downloads/Tiny RPG Character Asset Pack v1.03 -Free Soldier&Orc/Characters(100x100)/Orc/Orc/Orc-Death.png" id="3_death"]
+[ext_resource type="Texture2D" uid="uid://dmxdax0cut6vf" path="res://downloads/Tiny RPG Character Asset Pack v1.03 -Free Soldier&Orc/Characters(100x100)/Orc/Orc/Orc-Attack02.png" id="3_vop6o"]
+[ext_resource type="Script" uid="uid://dkerpfqc1gg2w" path="res://HealthComponent.gd" id="4_health"]
+[ext_resource type="Texture2D" uid="uid://b1v1i38b6b7vc" path="res://downloads/Tiny RPG Character Asset Pack v1.03 -Free Soldier&Orc/Characters(100x100)/Orc/Orc/Orc-Walk.png" id="6_gak77"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_edvsq"]
 
-[node name="enemy_base" type="CharacterBody2D"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_3vlx0"]
+atlas = ExtResource("2_ehd03")
+region = Rect2(0, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xg66o"]
+atlas = ExtResource("2_ehd03")
+region = Rect2(100, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xgwlu"]
+atlas = ExtResource("2_ehd03")
+region = Rect2(200, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_txhf7"]
+atlas = ExtResource("2_ehd03")
+region = Rect2(300, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3cftk"]
+atlas = ExtResource("2_ehd03")
+region = Rect2(400, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ynmqp"]
+atlas = ExtResource("2_ehd03")
+region = Rect2(500, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qo0va"]
+atlas = ExtResource("3_vop6o")
+region = Rect2(0, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0bgyb"]
+atlas = ExtResource("3_vop6o")
+region = Rect2(100, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hwv6a"]
+atlas = ExtResource("3_vop6o")
+region = Rect2(200, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ta8vy"]
+atlas = ExtResource("3_vop6o")
+region = Rect2(300, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5la1j"]
+atlas = ExtResource("3_vop6o")
+region = Rect2(400, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_javna"]
+atlas = ExtResource("3_vop6o")
+region = Rect2(500, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jkn47"]
+atlas = ExtResource("3_death")
+region = Rect2(0, 50, 100, 25)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_id2bm"]
+atlas = ExtResource("3_death")
+region = Rect2(100, 50, 100, 25)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_o5dqy"]
+atlas = ExtResource("3_death")
+region = Rect2(200, 50, 100, 25)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_phl30"]
+atlas = ExtResource("3_death")
+region = Rect2(300, 50, 100, 25)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dca0h"]
+atlas = ExtResource("2_idle")
+region = Rect2(0, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yfflu"]
+atlas = ExtResource("2_idle")
+region = Rect2(100, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bohod"]
+atlas = ExtResource("2_idle")
+region = Rect2(200, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8ytak"]
+atlas = ExtResource("2_idle")
+region = Rect2(300, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2trtg"]
+atlas = ExtResource("2_idle")
+region = Rect2(400, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ktba4"]
+atlas = ExtResource("2_idle")
+region = Rect2(500, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xigxb"]
+atlas = ExtResource("6_gak77")
+region = Rect2(0, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wmeck"]
+atlas = ExtResource("6_gak77")
+region = Rect2(100, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hreix"]
+atlas = ExtResource("6_gak77")
+region = Rect2(200, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k4qbs"]
+atlas = ExtResource("6_gak77")
+region = Rect2(300, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_j8hj1"]
+atlas = ExtResource("6_gak77")
+region = Rect2(400, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bhjxi"]
+atlas = ExtResource("6_gak77")
+region = Rect2(500, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qrvyy"]
+atlas = ExtResource("6_gak77")
+region = Rect2(600, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6qt8w"]
+atlas = ExtResource("6_gak77")
+region = Rect2(700, 0, 100, 100)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_someid"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3vlx0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xg66o")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xgwlu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_txhf7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3cftk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ynmqp")
+}],
+"loop": true,
+"name": &"attack_1",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qo0va")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0bgyb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hwv6a")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ta8vy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5la1j")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_javna")
+}],
+"loop": true,
+"name": &"attack_2",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jkn47")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_id2bm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_o5dqy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_phl30")
+}],
+"loop": false,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dca0h")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yfflu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bohod")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8ytak")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2trtg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ktba4")
+}],
+"loop": true,
+"name": &"idle_down",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xigxb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wmeck")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hreix")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k4qbs")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_j8hj1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bhjxi")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qrvyy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6qt8w")
+}],
+"loop": true,
+"name": &"walk_right",
+"speed": 5.0
+}]
+
+[node name="enemy_base" type="CharacterBody2D" groups=["enemy"]]
 scale = Vector2(3, 3)
 script = ExtResource("1_8nqel")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_edvsq")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("2_edvsq")
-region_enabled = true
-region_rect = Rect2(33.5, 32.75, 36, 32)
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_someid")
+animation = &"walk_right"
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("4_health")
