@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://bqkg6nbs0ndnt"]
+[gd_scene load_steps=5 format=3 uid="uid://bqkg6nbs0ndnt"]
 
 [ext_resource type="Script" uid="uid://k8ca8js7srsg" path="res://player.gd" id="1_4flbx"]
 [ext_resource type="Texture2D" uid="uid://cqklb4nsn461u" path="res://icon.svg" id="2_onrkg"]
+[ext_resource type="Script" uid="uid://dkerpfqc1gg2w" path="res://HealthComponent.gd" id="3_i3pqv"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_i3pqv"]
 radius = 64.0
@@ -19,3 +20,6 @@ texture = ExtResource("2_onrkg")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 zoom = Vector2(2, 2)
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("3_i3pqv")
