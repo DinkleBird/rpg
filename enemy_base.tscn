@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3 uid="uid://7btmust8ydkn"]
+
+[ext_resource type="Script" uid="uid://jpmx2qkty7ch" path="res://enemy.gd" id="1_8nqel"]
+[ext_resource type="Texture2D" uid="uid://ch0w6u34nvxek" path="res://downloads/Tiny RPG Character Asset Pack v1.03 -Free Soldier&Orc/Characters(100x100)/Orc/Orc/Orc-Idle.png" id="2_edvsq"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_edvsq"]
+
+[node name="enemy_base" type="CharacterBody2D"]
+scale = Vector2(3, 3)
+script = ExtResource("1_8nqel")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_edvsq")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_edvsq")
+region_enabled = true
+region_rect = Rect2(33.5, 32.75, 36, 32)

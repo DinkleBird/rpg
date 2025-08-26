@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://bsqpivlfqe4cl"]
+[gd_scene load_steps=4 format=3 uid="uid://bsqpivlfqe4cl"]
 
 [ext_resource type="PackedScene" uid="uid://bqkg6nbs0ndnt" path="res://player.tscn" id="1_ig7tw"]
 [ext_resource type="PackedScene" uid="uid://vhews5o0b0s8" path="res://environment/Rock.tscn" id="2_0xm2m"]
+[ext_resource type="PackedScene" uid="uid://7btmust8ydkn" path="res://enemy_base.tscn" id="3_h2yge"]
 
 [node name="Main" type="Node2D"]
 
@@ -18,3 +19,7 @@ position = Vector2(-406, -95)
 
 [node name="Rock4" parent="." instance=ExtResource("2_0xm2m")]
 position = Vector2(-58, -286)
+
+[node name="enemy_base" parent="." node_paths=PackedStringArray("player_node") instance=ExtResource("3_h2yge")]
+position = Vector2(651, 321)
+player_node = NodePath("../Player")
