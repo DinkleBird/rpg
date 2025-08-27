@@ -42,13 +42,16 @@ func _unhandled_input(event):
 		target_zoom = clamp(target_zoom, min_zoom, max_zoom)
 
 func _physics_process(delta):
-	if current_state == State.ATTACK:
-		velocity = Vector2.ZERO
-	else:
-		handle_movement()
-		if Input.is_action_just_pressed("attack") and attack_cooldown_timer.is_stopped():
-			current_state = State.ATTACK
-			attack()
+	match current_state:
+		State.DEATH:
+			velocity = Vector2.ZERO
+		State.ATTACK:
+			velocity = Vector2.ZERO
+		_:
+			handle_movement()
+			if Input.is_action_just_pressed("attack") and attack_cooldown_timer.is_stopped():
+				current_state = State.ATTACK
+				attack()
 
 	update_animation()
 	move_and_slide()
@@ -117,10 +120,5 @@ func _on_attack_hitbox_body_entered(body):
 
 func _on_died():
 	current_state = State.DEATH
-	# Here you can play a death animation, disable input, etc.
-	print("Player has died!")
-	set_physics_process(false) # Stop processing movement and input
-	# For example, you might want to play a death animation and then end the game.
-	# animated_sprite.play("death")
-	# await animated_sprite.animation_finished
-	# get_tree().reload_current_scene()
+	# Respawn by reloading the scene after a short delay
+	get_tree().create_timer(1.0).timeout.connect(get_tree().reload_current_scene)
