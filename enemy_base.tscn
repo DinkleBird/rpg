@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://dk5hevcxagmq5" path="res://downloads/Tiny RPG Character Asset Pack v1.03 -Free Soldier&Orc/Characters(100x100)/Orc/Orc/Orc-Death.png" id="3_death"]
 [ext_resource type="Texture2D" uid="uid://dmxdax0cut6vf" path="res://downloads/Tiny RPG Character Asset Pack v1.03 -Free Soldier&Orc/Characters(100x100)/Orc/Orc/Orc-Attack02.png" id="3_vop6o"]
 [ext_resource type="Script" uid="uid://dkerpfqc1gg2w" path="res://HealthComponent.gd" id="4_health"]
+[ext_resource type="PackedScene" uid="uid://cne3xep41t7g" path="res://EnemyHealthBar.tscn" id="5_abcde"]
 [ext_resource type="Texture2D" uid="uid://b1v1i38b6b7vc" path="res://downloads/Tiny RPG Character Asset Pack v1.03 -Free Soldier&Orc/Characters(100x100)/Orc/Orc/Orc-Walk.png" id="6_gak77"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ehd03"]
@@ -268,6 +269,8 @@ speed_scale = 2.6
 
 [node name="HealthComponent" type="Node" parent="."]
 script = ExtResource("4_health")
+
+[node name="EnemyHealthBar" parent="." instance=ExtResource("5_abcde")]
 
 [node name="AttackCooldownTimer" type="Timer" parent="."]
 one_shot = true
