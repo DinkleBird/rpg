@@ -1,4 +1,4 @@
-[gd_scene load_steps=40 format=3 uid="uid://7btmust8ydkn"]
+[gd_scene load_steps=41 format=3 uid="uid://7btmust8ydkn"]
 
 [ext_resource type="Script" uid="uid://jpmx2qkty7ch" path="res://enemy.gd" id="1_8nqel"]
 [ext_resource type="Texture2D" uid="uid://br0iosvgmwomv" path="res://downloads/Tiny RPG Character Asset Pack v1.03 -Free Soldier&Orc/Characters(100x100)/Orc/Orc/Orc-Attack01.png" id="2_ehd03"]
@@ -8,8 +8,9 @@
 [ext_resource type="Script" uid="uid://dkerpfqc1gg2w" path="res://HealthComponent.gd" id="4_health"]
 [ext_resource type="Texture2D" uid="uid://b1v1i38b6b7vc" path="res://downloads/Tiny RPG Character Asset Pack v1.03 -Free Soldier&Orc/Characters(100x100)/Orc/Orc/Orc-Walk.png" id="6_gak77"]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_edvsq"]
-radius = 80.0
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ehd03"]
+radius = 37.037
+height = 103.704
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_3vlx0"]
 atlas = ExtResource("2_ehd03")
@@ -153,7 +154,7 @@ animations = [{
 "texture": SubResource("AtlasTexture_ynmqp")
 }],
 "loop": false,
-"name": &"attack_1",
+"name": &"Attack01",
 "speed": 5.0
 }, {
 "frames": [{
@@ -176,7 +177,7 @@ animations = [{
 "texture": SubResource("AtlasTexture_javna")
 }],
 "loop": false,
-"name": &"attack_2",
+"name": &"Attack02",
 "speed": 5.0
 }, {
 "frames": [{
@@ -193,7 +194,7 @@ animations = [{
 "texture": SubResource("AtlasTexture_phl30")
 }],
 "loop": false,
-"name": &"death",
+"name": &"Death",
 "speed": 5.0
 }, {
 "frames": [{
@@ -216,7 +217,7 @@ animations = [{
 "texture": SubResource("AtlasTexture_ktba4")
 }],
 "loop": true,
-"name": &"idle_down",
+"name": &"Idle",
 "speed": 5.0
 }, {
 "frames": [{
@@ -245,31 +246,36 @@ animations = [{
 "texture": SubResource("AtlasTexture_6qt8w")
 }],
 "loop": true,
-"name": &"walk_right",
+"name": &"Walk",
 "speed": 5.0
 }]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ehd03"]
+radius = 24.7027
 
 [node name="enemy_base" type="CharacterBody2D" groups=["enemy"]]
 scale = Vector2(1.5, 1.5)
 script = ExtResource("1_8nqel")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-scale = Vector2(0.2, 0.2)
-shape = SubResource("CircleShape2D_edvsq")
+scale = Vector2(0.18, 0.18)
+shape = SubResource("CapsuleShape2D_ehd03")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_someid")
-animation = &"walk_right"
+animation = &"Death"
+speed_scale = 2.6
 
 [node name="HealthComponent" type="Node" parent="."]
 script = ExtResource("4_health")
 
-[node name="AttackRange" type="Area2D" parent="."]
-collision_layer = 0
-collision_mask = 2
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="AttackRange"]
-shape = SubResource("CircleShape2D_edvsq")
-
 [node name="AttackCooldownTimer" type="Timer" parent="."]
 one_shot = true
+
+[node name="AttackRange" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AttackRange"]
+shape = SubResource("CircleShape2D_ehd03")
+
+[connection signal="body_entered" from="AttackRange" to="." method="_on_attack_range_body_entered"]
+[connection signal="body_exited" from="AttackRange" to="." method="_on_attack_range_body_exited"]

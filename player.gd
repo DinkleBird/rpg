@@ -13,11 +13,13 @@ extends CharacterBody2D
 @onready var attack_timer = $AttackTimer
 @onready var attack_hitbox_shape = $AttackHitbox/CollisionShape2D
 @onready var attack_cooldown_timer = $AttackCooldownTimer
+@onready var health_component = $HealthComponent
 
 enum State {
 	IDLE,
 	RUN,
-	ATTACK
+	ATTACK,
+	DEATH
 }
 
 var current_state = State.IDLE
@@ -26,8 +28,9 @@ var target_zoom = 2.0
 
 func _ready():
 	attack_timer.timeout.connect(_on_attack_timer_timeout)
-	attack_hitbox.body_entered.connect(_on_attack_hitbox_body_entered)
+#	attack_hitbox.body_entered.connect(_on_attack_hitbox_body_entered)
 	animated_sprite.animation_finished.connect(_on_animation_finished)
+	health_component.died.connect(_on_died)
 
 
 func _unhandled_input(event):
@@ -93,6 +96,7 @@ func update_animation():
 		animated_sprite.play(anim_name)
 
 func attack():
+	print("Attack!")
 	attack_cooldown_timer.start(attack_cooldown)
 	attack_hitbox_shape.disabled = false
 	attack_timer.start() 
@@ -103,7 +107,20 @@ func _on_attack_timer_timeout():
 func _on_animation_finished():
 	if animated_sprite.animation.begins_with("attack"):
 		current_state = State.IDLE
+	else:
+		pass
 
 func _on_attack_hitbox_body_entered(body):
+	print("Player attack hitbox entered body: ", body.name)
 	if body.is_in_group("enemy"):
 		body.get_node("HealthComponent").take_damage(10)
+
+func _on_died():
+	current_state = State.DEATH
+	# Here you can play a death animation, disable input, etc.
+	print("Player has died!")
+	set_physics_process(false) # Stop processing movement and input
+	# For example, you might want to play a death animation and then end the game.
+	# animated_sprite.play("death")
+	# await animated_sprite.animation_finished
+	# get_tree().reload_current_scene()

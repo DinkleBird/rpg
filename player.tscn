@@ -755,7 +755,7 @@ animations = [{
 }]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_bwjto"]
-radius = 50.2494
+radius = 43.0
 
 [node name="Player" type="CharacterBody2D" groups=["player"]]
 script = ExtResource("1_4flbx")
@@ -776,8 +776,6 @@ zoom = Vector2(2, 2)
 script = ExtResource("4_i3pqv")
 
 [node name="AttackHitbox" type="Area2D" parent="."]
-collision_layer = 8
-collision_mask = 4
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AttackHitbox"]
 shape = SubResource("CircleShape2D_bwjto")
@@ -789,3 +787,5 @@ one_shot = true
 
 [node name="AttackCooldownTimer" type="Timer" parent="."]
 one_shot = true
+
+[connection signal="body_entered" from="AttackHitbox" to="." method="_on_attack_hitbox_body_entered"]

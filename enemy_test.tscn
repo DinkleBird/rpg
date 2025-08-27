@@ -1,0 +1,30 @@
+[gd_scene load_steps=5 format=3 uid="uid://dnxi8xtig83rb"]
+
+[ext_resource type="Script" uid="uid://ckqdlekw5mfed" path="res://enemy_test.gd" id="1_tekfo"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_tg40w"]
+radius = 1.41421
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_tekfo"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_tegdf"]
+
+[node name="enemy_test" type="CharacterBody2D"]
+scale = Vector2(5, 5)
+script = ExtResource("1_tekfo")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_tg40w")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(5.96046e-08, -5.96046e-08)
+scale = Vector2(2.5, 2.5)
+texture = SubResource("PlaceholderTexture2D_tekfo")
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+visibility_layer = 2
+shape = SubResource("CircleShape2D_tegdf")
+
+[connection signal="body_entered" from="Area2D" to="." method="_on_area_2d_body_entered"]
