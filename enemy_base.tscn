@@ -263,7 +263,7 @@ shape = SubResource("CapsuleShape2D_ehd03")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_someid")
-animation = &"Death"
+animation = &"Attack01"
 speed_scale = 2.6
 
 [node name="HealthComponent" type="Node" parent="."]
@@ -275,6 +275,7 @@ one_shot = true
 [node name="AttackRange" type="Area2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AttackRange"]
+visible = false
 shape = SubResource("CircleShape2D_ehd03")
 
 [connection signal="body_entered" from="AttackRange" to="." method="_on_attack_range_body_entered"]

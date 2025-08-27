@@ -1,9 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://bsqpivlfqe4cl"]
+[gd_scene load_steps=4 format=3 uid="uid://bsqpivlfqe4cl"]
 
 [ext_resource type="PackedScene" uid="uid://bqkg6nbs0ndnt" path="res://player.tscn" id="1_ig7tw"]
 [ext_resource type="PackedScene" uid="uid://vhews5o0b0s8" path="res://environment/Rock.tscn" id="2_0xm2m"]
 [ext_resource type="PackedScene" uid="uid://7btmust8ydkn" path="res://enemy_base.tscn" id="3_h2yge"]
-[ext_resource type="PackedScene" uid="uid://dnxi8xtig83rb" path="res://enemy_test.tscn" id="4_1bvp3"]
 
 [node name="Main" type="Node2D"]
 
@@ -23,6 +22,3 @@ position = Vector2(-58, -286)
 
 [node name="enemy_base" parent="." instance=ExtResource("3_h2yge")]
 position = Vector2(651, 321)
-
-[node name="enemy_test" parent="." instance=ExtResource("4_1bvp3")]
-position = Vector2(-232, 239)

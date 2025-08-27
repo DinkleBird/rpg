@@ -25,8 +25,10 @@ enum State {
 var current_state = State.IDLE
 var facing_direction = "down"
 var target_zoom = 2.0
+var start_position: Vector2
 
 func _ready():
+	start_position = global_position
 	attack_timer.timeout.connect(_on_attack_timer_timeout)
 #	attack_hitbox.body_entered.connect(_on_attack_hitbox_body_entered)
 	animated_sprite.animation_finished.connect(_on_animation_finished)
@@ -120,5 +122,11 @@ func _on_attack_hitbox_body_entered(body):
 
 func _on_died():
 	current_state = State.DEATH
-	# Respawn by reloading the scene after a short delay
-	get_tree().create_timer(1.0).timeout.connect(get_tree().reload_current_scene)
+	# After a 1 second delay, call the respawn function
+	get_tree().create_timer(1.0).timeout.connect(respawn)
+
+func respawn():
+	health_component.reset()
+	global_position = start_position
+	current_state = State.IDLE
+	$HealthBar.visible = true

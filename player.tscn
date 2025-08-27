@@ -1,4 +1,4 @@
-[gd_scene load_steps=114 format=3 uid="uid://bqkg6nbs0ndnt"]
+[gd_scene load_steps=115 format=3 uid="uid://bqkg6nbs0ndnt"]
 
 [ext_resource type="Script" uid="uid://k8ca8js7srsg" path="res://player.gd" id="1_4flbx"]
 [ext_resource type="Texture2D" uid="uid://vuyggh0dhtac" path="res://downloads/FREE_Adventurer 2D Pixel Art/Sprites/IDLE/idle_down.png" id="2_idle"]
@@ -14,6 +14,7 @@
 [ext_resource type="Texture2D" uid="uid://bvd2v7nvokqde" path="res://downloads/FREE_Adventurer 2D Pixel Art/Sprites/RUN/run_left.png" id="11_5tmop"]
 [ext_resource type="Texture2D" uid="uid://c2frtwu35dhua" path="res://downloads/FREE_Adventurer 2D Pixel Art/Sprites/RUN/run_right.png" id="12_7ahtn"]
 [ext_resource type="Texture2D" uid="uid://bhxpp7ppbqwny" path="res://downloads/FREE_Adventurer 2D Pixel Art/Sprites/RUN/run_up.png" id="13_7lmhl"]
+[ext_resource type="PackedScene" path="res://HealthBar.tscn" id="14_hpbar"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_i3pqv"]
 radius = 11.0
@@ -774,6 +775,8 @@ zoom = Vector2(2, 2)
 
 [node name="HealthComponent" type="Node" parent="."]
 script = ExtResource("4_i3pqv")
+
+[node name="HealthBar" parent="." instance=ExtResource("14_hpbar")]
 
 [node name="AttackHitbox" type="Area2D" parent="."]
 

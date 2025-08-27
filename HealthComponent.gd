@@ -44,3 +44,7 @@ func heal(heal_amount):
 	
 	# Emit the healed signal.
 	emit_signal("healed", heal_amount)
+
+func reset():
+	_current_health = _max_health
+	emit_signal("healed", _max_health) # Notify listeners (like the health bar) that health has been restored
