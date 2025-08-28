@@ -9,7 +9,7 @@ script = ExtResource("1_abcde")
 collision_layer = 0
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="FieldOfView"]
-polygon = PackedVector2Array(0, 0, 200, -50, 200, 50)
+polygon = PackedVector2Array(0, 0, 200, -82, 200, 82)
 
 [connection signal="body_entered" from="FieldOfView" to="." method="_on_fov_body_entered"]
 [connection signal="body_exited" from="FieldOfView" to="." method="_on_fov_body_exited"]

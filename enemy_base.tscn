@@ -261,6 +261,7 @@ radius = 100.0
 [node name="enemy_base" type="CharacterBody2D" groups=["enemy"]]
 scale = Vector2(1.5, 1.5)
 script = ExtResource("1_8nqel")
+search_angle_range = 360.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 scale = Vector2(0.18, 0.18)
@@ -290,6 +291,10 @@ shape = SubResource("CircleShape2D_ehd03")
 shape = SubResource("CircleShape2D_aggro")
 
 [node name="PerceptionComponent" parent="." instance=ExtResource("7_abcde")]
+
+[node name="SearchTimer" type="Timer" parent="."]
+wait_time = 5.0
+one_shot = true
 
 [connection signal="body_entered" from="AttackRange" to="." method="_on_attack_range_body_entered"]
 [connection signal="body_exited" from="AttackRange" to="." method="_on_attack_range_body_exited"]

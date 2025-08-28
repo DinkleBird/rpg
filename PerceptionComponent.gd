@@ -18,25 +18,27 @@ func _process(delta: float):
 	if not is_instance_valid(player):
 		return
 
-	# 1. Get player's stealth rating
 	var player_stealth_rating: float = 0.0
 	if player.has_node("StealthComponent"):
 		player_stealth_rating = player.get_node("StealthComponent").get_stealth_rating()
 
-	# 2. Calculate enemy's perception rating
-	var perception_rating: float = base_perception + current_sound_modifier
+	var perception_rating: float = 0.0 # Start with 0 perception
+	var has_sensory_input = false
 
-	# Add bonus for being in the field of view
 	if player_in_fov:
+		has_sensory_input = true
+		perception_rating += base_perception
 		perception_rating += line_of_sight_bonus
+		
+		var distance: float = global_position.distance_to(player.global_position)
+		var distance_factor: float = 1.0 - clamp(distance / 400.0, 0.0, 1.0)
+		perception_rating += distance_factor * (100.0 - base_perception - line_of_sight_bonus)
 
-	# Add bonus for proximity
-	var distance: float = global_position.distance_to(player.global_position)
-	var distance_factor: float = 1.0 - clamp(distance / 400.0, 0.0, 1.0) # Using a hardcoded max distance for this example
-	perception_rating += distance_factor * (100.0 - base_perception - line_of_sight_bonus)
+	if current_sound_modifier > 0:
+		has_sensory_input = true
+		perception_rating += current_sound_modifier
 
-	# 3. Update the detection meter
-	if perception_rating > player_stealth_rating:
+	if has_sensory_input and perception_rating > player_stealth_rating:
 		detection_meter += (perception_rating - player_stealth_rating) * detection_rate * delta
 	else:
 		detection_meter -= reduction_rate * delta
@@ -46,7 +48,6 @@ func _process(delta: float):
 	if detection_meter >= 100.0:
 		emit_signal("player_detected")
 
-	# Reset the sound modifier for the next frame
 	current_sound_modifier = 0.0
 
 # Call this from a player's sound-generating action

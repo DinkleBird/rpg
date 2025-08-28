@@ -3,12 +3,16 @@ extends CharacterBody2D
 
 @export var speed = 75.0
 @export var attack_cooldown = 1.0
+@export var search_duration = 5.0
+@export var search_angle_range = 60.0
+@export var search_speed = 2.0
 
 @onready var health_component = $HealthComponent
 @onready var animated_sprite = $AnimatedSprite2D
 @onready var attack_range = $AttackRange
 @onready var attack_cooldown_timer = $AttackCooldownTimer
 @onready var perception_component = $PerceptionComponent
+@onready var search_timer = $SearchTimer
 
 enum State {
 	IDLE,
@@ -16,7 +20,8 @@ enum State {
 	ATTACK,
 	HURT,
 	DEATH,
-	SEARCHING
+	SEARCHING,
+	LOOKING_AROUND
 }
 
 var current_state = State.IDLE
@@ -35,6 +40,7 @@ func _ready():
 	health_component.died.connect(_on_died)
 	animated_sprite.animation_finished.connect(_on_animation_finished)
 	perception_component.player_detected.connect(_on_player_detected)
+	search_timer.timeout.connect(_on_search_timer_timeout)
 	
 	var fov = perception_component.get_node("FieldOfView")
 	fov.body_entered.connect(_on_fov_body_entered)
@@ -59,8 +65,19 @@ func _physics_process(_delta):
 			velocity = direction_to_last_known * speed
 			move_and_slide()
 			if global_position.distance_to(last_known_position) < 10:
-				current_state = State.IDLE
-				player_detected = false
+				velocity = Vector2.ZERO
+				current_state = State.LOOKING_AROUND
+				search_timer.start(search_duration)
+		State.LOOKING_AROUND:
+			velocity = Vector2.ZERO
+			var base_angle = last_movement_direction.angle()
+			var offset = sin(Time.get_ticks_msec() * 0.001 * search_speed) * deg_to_rad(search_angle_range / 2.0)
+			perception_component.rotation = base_angle + offset
+			if perception_component.rotation_degrees > base_angle + 1:
+				animated_sprite.flip_h = false
+			elif perception_component.rotation_degrees < base_angle - 1:
+				animated_sprite.flip_h = true
+
 		State.IDLE:
 			velocity = Vector2.ZERO
 			if player_detected and not player_in_attack_range:
@@ -78,26 +95,37 @@ func _physics_process(_delta):
 	if velocity != Vector2.ZERO:
 		last_movement_direction = velocity.normalized()
 	
-	perception_component.rotation = last_movement_direction.angle()
+	if current_state != State.LOOKING_AROUND:
+		perception_component.rotation = last_movement_direction.angle()
 	
 	if current_state != State.ATTACK and current_state != State.DEATH:
 		update_animation()
 
 func _on_player_detected():
 	player_detected = true
+	search_timer.stop()
 	var players_in_group = get_tree().get_nodes_in_group("player")
 	if not players_in_group.is_empty():
 		_current_target = players_in_group[0]
+		last_known_position = _current_target.global_position
 
 func _on_fov_body_entered(body):
 	if body.is_in_group("player"):
 		perception_component.player_in_fov = true
+		if current_state == State.SEARCHING or current_state == State.LOOKING_AROUND:
+			current_state = State.WALK
+			search_timer.stop()
+
 
 func _on_fov_body_exited(body):
 	if body.is_in_group("player"):
 		perception_component.player_in_fov = false
 		if player_detected:
 			current_state = State.SEARCHING
+
+func _on_search_timer_timeout():
+	current_state = State.IDLE
+	player_detected = false
 
 func update_animation():
 	var anim_name = "Idle"
@@ -109,6 +137,8 @@ func update_animation():
 		elif velocity.x < 0:
 			animated_sprite.flip_h = true
 			attack_range.position = hitbox_positions["left"]
+	elif current_state == State.LOOKING_AROUND:
+		anim_name = "Idle"
 	elif current_state == State.ATTACK:
 		var attack_animations = ["Attack01", "Attack02"]
 		anim_name = attack_animations[randi() % attack_animations.size()]
