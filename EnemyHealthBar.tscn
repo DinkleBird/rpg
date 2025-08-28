@@ -1,6 +1,9 @@
-[gd_scene load_steps=2 format=3 uid="uid://cne3xep41t7g"]
+[gd_scene load_steps=3 format=3 uid="uid://new_enemy_health_bar_uid"]
 
 [ext_resource type="Script" path="res://EnemyHealthBar.gd" id="1_v8p1w"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5v0j2"]
+bg_color = Color(1, 0, 0, 1)
 
 [node name="EnemyHealthBar" type="ProgressBar"]
 custom_minimum_size = Vector2(40, 8)
@@ -10,3 +13,4 @@ offset_right = 20.0
 offset_bottom = -22.0
 show_percentage = false
 script = ExtResource("1_v8p1w")
+theme_override_styles/fill = SubResource("StyleBoxFlat_5v0j2")

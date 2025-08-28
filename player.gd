@@ -1,7 +1,7 @@
 extends CharacterBody2D
 
 @export var speed = 100
-@export var sprint_speed_multiplier = 1.5
+@export var sprint_speed_multiplier = 1.7
 @export var zoom_speed = 0.1
 @export var min_zoom = 0.5
 @export var max_zoom = 3.0
@@ -19,6 +19,8 @@ enum State {
 	IDLE,
 	RUN,
 	ATTACK,
+	BLOCK,
+	CROUCH,
 	DEATH
 }
 
@@ -26,11 +28,22 @@ var current_state = State.IDLE
 var facing_direction = "down"
 var target_zoom = 2.0
 var start_position: Vector2
+var is_blocking = false
+var is_crouching = false
+var is_undetected = true # Assume undetected by default
+var _damage_to_deal_on_attack = 0 # Stores damage to be dealt on attack
+
+var hitbox_positions = {
+	"down": Vector2(0, 20),
+	"up": Vector2(0, -20),
+	"left": Vector2(-20, 0),
+	"right": Vector2(20, 0)
+}
 
 func _ready():
+	add_to_group("player") # Ensure player is in the "player" group
 	start_position = global_position
 	attack_timer.timeout.connect(_on_attack_timer_timeout)
-#	attack_hitbox.body_entered.connect(_on_attack_hitbox_body_entered)
 	animated_sprite.animation_finished.connect(_on_animation_finished)
 	health_component.died.connect(_on_died)
 
@@ -49,11 +62,34 @@ func _physics_process(delta):
 			velocity = Vector2.ZERO
 		State.ATTACK:
 			velocity = Vector2.ZERO
+		State.BLOCK:
+			velocity = Vector2.ZERO
+		State.CROUCH:
+			# Allow movement while crouching, but at reduced speed
+			handle_movement()
+			velocity *= 0.5 # Adjust as needed
 		_:
 			handle_movement()
-			if Input.is_action_just_pressed("attack") and attack_cooldown_timer.is_stopped():
-				current_state = State.ATTACK
-				attack()
+	
+	if Input.is_action_just_pressed("attack") and attack_cooldown_timer.is_stopped():
+		current_state = State.ATTACK
+		attack()
+	
+	if Input.is_action_pressed("block"):
+		current_state = State.BLOCK
+		is_blocking = true
+		health_component.is_blocking = true
+	elif Input.is_action_just_released("block"):
+		current_state = State.IDLE
+		is_blocking = false
+		health_component.is_blocking = false
+
+	if Input.is_action_pressed("crouch"):
+		current_state = State.CROUCH
+		is_crouching = true
+	elif Input.is_action_just_released("crouch"):
+		current_state = State.IDLE
+		is_crouching = false
 
 	update_animation()
 	move_and_slide()
@@ -73,6 +109,7 @@ func handle_movement():
 	else:
 		current_state = State.IDLE
 		velocity = Vector2.ZERO
+
 
 func update_facing_direction(direction):
 	if direction.y > 0:
@@ -96,12 +133,24 @@ func update_animation():
 				anim_name = "attack"
 			else:
 				anim_name = "attack_" + facing_direction
+		State.BLOCK:
+			anim_name = "idle_" + facing_direction # Replace with block animation
+		State.CROUCH:
+			anim_name = "idle_" + facing_direction # Replace with crouch animation
 	
 	if animated_sprite.animation != anim_name:
 		animated_sprite.play(anim_name)
 
 func attack():
 	print("Attack!")
+	var calculated_damage = 10 # Base damage
+	if is_undetected:
+		calculated_damage *= 3 # Sneak attack bonus
+		print("Sneak Attack!")
+	
+	_damage_to_deal_on_attack = calculated_damage # Store the calculated damage
+	
+	attack_hitbox.position = hitbox_positions[facing_direction]
 	attack_cooldown_timer.start(attack_cooldown)
 	attack_hitbox_shape.disabled = false
 	attack_timer.start() 
@@ -118,7 +167,10 @@ func _on_animation_finished():
 func _on_attack_hitbox_body_entered(body):
 	print("Player attack hitbox entered body: ", body.name)
 	if body.is_in_group("enemy"):
-		body.get_node("HealthComponent").take_damage(10)
+		body.get_node("HealthComponent").take_damage(_damage_to_deal_on_attack)
+		# Call the new function on the enemy to make it turn and re-check
+		if body.has_method("_on_attacked_from_direction"):
+			body._on_attacked_from_direction(global_position)
 
 func _on_died():
 	current_state = State.DEATH
@@ -130,3 +182,6 @@ func respawn():
 	global_position = start_position
 	current_state = State.IDLE
 	$HealthBar.visible = true
+
+func set_undetected(value):
+	is_undetected = value

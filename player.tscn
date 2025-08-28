@@ -14,7 +14,7 @@
 [ext_resource type="Texture2D" uid="uid://bvd2v7nvokqde" path="res://downloads/FREE_Adventurer 2D Pixel Art/Sprites/RUN/run_left.png" id="11_5tmop"]
 [ext_resource type="Texture2D" uid="uid://c2frtwu35dhua" path="res://downloads/FREE_Adventurer 2D Pixel Art/Sprites/RUN/run_right.png" id="12_7ahtn"]
 [ext_resource type="Texture2D" uid="uid://bhxpp7ppbqwny" path="res://downloads/FREE_Adventurer 2D Pixel Art/Sprites/RUN/run_up.png" id="13_7lmhl"]
-[ext_resource type="PackedScene" path="res://HealthBar.tscn" id="14_hpbar"]
+[ext_resource type="PackedScene" uid="uid://cne3xep41t7g" path="res://HealthBar.tscn" id="14_hpbar"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_i3pqv"]
 radius = 11.0

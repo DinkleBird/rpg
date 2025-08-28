@@ -11,7 +11,7 @@ radius = 1.41421
 
 [node name="enemy_test" type="CharacterBody2D"]
 scale = Vector2(5, 5)
-script = ExtResource("1_tekfo")
+script = ExtResource("1_tekfo") # This will be updated to enemy.gd's resource ID
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_tg40w")
