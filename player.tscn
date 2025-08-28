@@ -1,4 +1,4 @@
-[gd_scene load_steps=115 format=3 uid="uid://bqkg6nbs0ndnt"]
+[gd_scene load_steps=116 format=3 uid="uid://bqkg6nbs0ndnt"]
 
 [ext_resource type="Script" uid="uid://k8ca8js7srsg" path="res://player.gd" id="1_4flbx"]
 [ext_resource type="Texture2D" uid="uid://vuyggh0dhtac" path="res://downloads/FREE_Adventurer 2D Pixel Art/Sprites/IDLE/idle_down.png" id="2_idle"]
@@ -15,6 +15,7 @@
 [ext_resource type="Texture2D" uid="uid://c2frtwu35dhua" path="res://downloads/FREE_Adventurer 2D Pixel Art/Sprites/RUN/run_right.png" id="12_7ahtn"]
 [ext_resource type="Texture2D" uid="uid://bhxpp7ppbqwny" path="res://downloads/FREE_Adventurer 2D Pixel Art/Sprites/RUN/run_up.png" id="13_7lmhl"]
 [ext_resource type="PackedScene" uid="uid://cne3xep41t7g" path="res://HealthBar.tscn" id="14_hpbar"]
+[ext_resource type="PackedScene" path="res://StealthComponent.tscn" id="15_abcde"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_i3pqv"]
 radius = 11.0
@@ -790,5 +791,7 @@ one_shot = true
 
 [node name="AttackCooldownTimer" type="Timer" parent="."]
 one_shot = true
+
+[node name="StealthComponent" parent="." instance=ExtResource("15_abcde")]
 
 [connection signal="body_entered" from="AttackHitbox" to="." method="_on_attack_hitbox_body_entered"]

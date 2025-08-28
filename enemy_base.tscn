@@ -1,4 +1,4 @@
-[gd_scene load_steps=43 format=3 uid="uid://7btmust8ydkn"]
+[gd_scene load_steps=44 format=3 uid="uid://7btmust8ydkn"]
 
 [ext_resource type="Script" uid="uid://jpmx2qkty7ch" path="res://enemy.gd" id="1_8nqel"]
 [ext_resource type="Texture2D" uid="uid://br0iosvgmwomv" path="res://downloads/Tiny RPG Character Asset Pack v1.03 -Free Soldier&Orc/Characters(100x100)/Orc/Orc/Orc-Attack01.png" id="2_ehd03"]
@@ -8,6 +8,7 @@
 [ext_resource type="Script" uid="uid://dkerpfqc1gg2w" path="res://HealthComponent.gd" id="4_health"]
 [ext_resource type="PackedScene" uid="uid://cne3xep41t7g" path="res://HealthBar.tscn" id="5_abcde"]
 [ext_resource type="Texture2D" uid="uid://b1v1i38b6b7vc" path="res://downloads/Tiny RPG Character Asset Pack v1.03 -Free Soldier&Orc/Characters(100x100)/Orc/Orc/Orc-Walk.png" id="6_gak77"]
+[ext_resource type="PackedScene" uid="uid://d307ixp4pvulm" path="res://PerceptionComponent.tscn" id="7_abcde"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ehd03"]
 radius = 37.037
@@ -279,16 +280,16 @@ script = ExtResource("4_health")
 one_shot = true
 
 [node name="AttackRange" type="Area2D" parent="."]
-visible = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AttackRange"]
-visible = false
 shape = SubResource("CircleShape2D_ehd03")
 
 [node name="AggroRange" type="Area2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AggroRange"]
 shape = SubResource("CircleShape2D_aggro")
+
+[node name="PerceptionComponent" parent="." instance=ExtResource("7_abcde")]
 
 [connection signal="body_entered" from="AttackRange" to="." method="_on_attack_range_body_entered"]
 [connection signal="body_exited" from="AttackRange" to="." method="_on_attack_range_body_exited"]

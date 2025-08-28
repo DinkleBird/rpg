@@ -14,6 +14,7 @@ extends CharacterBody2D
 @onready var attack_hitbox_shape = $AttackHitbox/CollisionShape2D
 @onready var attack_cooldown_timer = $AttackCooldownTimer
 @onready var health_component = $HealthComponent
+@onready var stealth_component = $StealthComponent
 
 enum State {
 	IDLE,
@@ -87,9 +88,11 @@ func _physics_process(delta):
 	if Input.is_action_pressed("crouch"):
 		current_state = State.CROUCH
 		is_crouching = true
+		stealth_component.set_player_state(stealth_component.PlayerState.SNEAKING)
 	elif Input.is_action_just_released("crouch"):
 		current_state = State.IDLE
 		is_crouching = false
+		# The state will be set in handle_movement
 
 	update_animation()
 	move_and_slide()
@@ -104,10 +107,16 @@ func handle_movement():
 		var current_speed = speed
 		if Input.is_action_pressed("sprint"):
 			current_speed *= sprint_speed_multiplier
+			stealth_component.set_player_state(stealth_component.PlayerState.SPRINTING)
+		else:
+			stealth_component.set_player_state(stealth_component.PlayerState.WALKING)
+
 		velocity = direction_input.normalized() * current_speed
 		update_facing_direction(direction_input)
 	else:
 		current_state = State.IDLE
+		if not is_crouching:
+			stealth_component.set_player_state(stealth_component.PlayerState.STANDING)
 		velocity = Vector2.ZERO
 
 

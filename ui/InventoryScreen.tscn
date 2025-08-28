@@ -1,0 +1,103 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://ui/InventoryScreen.gd" id="1_abcde"]
+[ext_resource type="PackedScene" path="res://ui/ItemSlot.tscn" id="2_fghij"]
+[ext_resource type="Texture2D" path="res://ui/panel_background.png" id="3_jklmn"]
+
+[node name="InventoryScreen" type="Panel"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -200.0
+offset_right = 250.0
+offset_bottom = 200.0
+script = ExtResource("1_abcde")
+
+[node name="NinePatchRect" type="NinePatchRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_jklmn")
+patch_margin_left = 16
+patch_margin_top = 16
+patch_margin_right = 16
+patch_margin_bottom = 16
+
+[node name="GridContainer" type="GridContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = -170.0
+offset_right = 220.0
+offset_bottom = 170.0
+columns = 5
+
+[node name="ItemSlot" parent="GridContainer" instance=ExtResource("2_fghij")]
+layout_mode = 2
+
+[node name="ItemSlot2" parent="GridContainer" instance=ExtResource("2_fghij")]
+layout_mode = 2
+
+[node name="ItemSlot3" parent="GridContainer" instance=ExtResource("2_fghij")]
+layout_mode = 2
+
+[node name="ItemSlot4" parent="GridContainer" instance=ExtResource("2_fghij")]
+layout_mode = 2
+
+[node name="ItemSlot5" parent="GridContainer" instance=ExtResource("2_fghij")]
+layout_mode = 2
+
+[node name="ItemSlot6" parent="GridContainer" instance=ExtResource("2_fghij")]
+layout_mode = 2
+
+[node name="ItemSlot7" parent="GridContainer" instance=ExtResource("2_fghij")]
+layout_mode = 2
+
+[node name="ItemSlot8" parent="GridContainer" instance=ExtResource("2_fghij")]
+layout_mode = 2
+
+[node name="ItemSlot9" parent="GridContainer" instance=ExtResource("2_fghij")]
+layout_mode = 2
+
+[node name="ItemSlot10" parent="GridContainer" instance=ExtResource("2_fghij")]
+layout_mode = 2
+
+[node name="ItemSlot11" parent="GridContainer" instance=ExtResource("2_fghij")]
+layout_mode = 2
+
+[node name="ItemSlot12" parent="GridContainer" instance=ExtResource("2_fghij")]
+layout_mode = 2
+
+[node name="ItemSlot13" parent="GridContainer" instance=ExtResource("2_fghij")]
+layout_mode = 2
+
+[node name="ItemSlot14" parent="GridContainer" instance=ExtResource("2_fghij")]
+layout_mode = 2
+
+[node name="ItemSlot15" parent="GridContainer" instance=ExtResource("2_fghij")]
+layout_mode = 2
+
+[node name="ItemSlot16" parent="GridContainer" instance=ExtResource("2_fghij")]
+layout_mode = 2
+
+[node name="ItemSlot17" parent="GridContainer" instance=ExtResource("2_fghij")]
+layout_mode = 2
+
+[node name="ItemSlot18" parent="GridContainer" instance=ExtResource("2_fghij")]
+layout_mode = 2
+
+[node name="ItemSlot19" parent="GridContainer" instance=ExtResource("2_fghij")]
+layout_mode = 2
+
+[node name="ItemSlot20" parent="GridContainer" instance=ExtResource("2_fghij")]
+layout_mode = 2

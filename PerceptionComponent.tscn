@@ -1,0 +1,15 @@
+[gd_scene load_steps=2 format=3 uid="uid://d307ixp4pvulm"]
+
+[ext_resource type="Script" uid="uid://cunc8jtpsldbr" path="res://PerceptionComponent.gd" id="1_abcde"]
+
+[node name="PerceptionComponent" type="Node2D"]
+script = ExtResource("1_abcde")
+
+[node name="FieldOfView" type="Area2D" parent="."]
+collision_layer = 0
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="FieldOfView"]
+polygon = PackedVector2Array(0, 0, 200, -50, 200, 50)
+
+[connection signal="body_entered" from="FieldOfView" to="." method="_on_fov_body_entered"]
+[connection signal="body_exited" from="FieldOfView" to="." method="_on_fov_body_exited"]
