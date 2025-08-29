@@ -7,6 +7,14 @@ extends CharacterBody2D
 @export var search_angle_range = 60.0
 @export var search_speed = 2.0
 
+@export_group("Perception")
+@export var base_perception: float = 50.0
+@export var line_of_sight_bonus: float = 20.0
+@export var detection_rate: float = 10.0
+@export var reduction_rate: float = 5.0
+@export var max_sound_perception: float = 50.0
+
+
 @onready var health_component = $HealthComponent
 @onready var animated_sprite = $AnimatedSprite2D
 @onready var attack_range = $AttackRange
@@ -40,11 +48,19 @@ func _ready():
 	health_component.died.connect(_on_died)
 	animated_sprite.animation_finished.connect(_on_animation_finished)
 	perception_component.player_detected.connect(_on_player_detected)
+	perception_component.sound_heard.connect(_on_sound_heard)
 	search_timer.timeout.connect(_on_search_timer_timeout)
 	
 	var fov = perception_component.get_node("FieldOfView")
 	fov.body_entered.connect(_on_fov_body_entered)
 	fov.body_exited.connect(_on_fov_body_exited)
+	
+	# Pass exported perception values to the PerceptionComponent
+	perception_component.base_perception = base_perception
+	perception_component.line_of_sight_bonus = line_of_sight_bonus
+	perception_component.detection_rate = detection_rate
+	perception_component.reduction_rate = reduction_rate
+	perception_component.max_sound_perception = max_sound_perception
 	
 func _physics_process(_delta):
 	match current_state:
@@ -108,6 +124,17 @@ func _on_player_detected():
 	if not players_in_group.is_empty():
 		_current_target = players_in_group[0]
 		last_known_position = _current_target.global_position
+
+func _on_sound_heard(sound_position: Vector2):
+	if not player_detected: # Only react to sound if not already chasing the player
+		last_known_position = sound_position
+		current_state = State.SEARCHING
+		var direction_to_sound = (sound_position - global_position).normalized()
+		if direction_to_sound.x > 0:
+			animated_sprite.flip_h = false
+		elif direction_to_sound.x < 0:
+			animated_sprite.flip_h = true
+
 
 func _on_fov_body_entered(body):
 	if body.is_in_group("player"):
@@ -184,6 +211,8 @@ func _on_attack_range_body_exited(body):
 
 func _on_attacked_from_direction(attacker_position: Vector2):
 	var direction_to_attacker = (attacker_position - global_position).normalized()
+	last_movement_direction = direction_to_attacker
+	perception_component.rotation = last_movement_direction.angle()
 
 	if direction_to_attacker.x > 0:
 		animated_sprite.flip_h = false

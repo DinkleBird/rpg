@@ -1,11 +1,11 @@
 # PerceptionComponent.gd
 extends Node2D
 
-@export var base_perception: float = 50.0
-@export var line_of_sight_bonus: float = 20.0
-@export var detection_rate: float = 10.0
-@export var reduction_rate: float = 5.0
-@export var max_sound_perception: float = 50.0
+var base_perception: float = 50.0
+var line_of_sight_bonus: float = 20.0
+var detection_rate: float = 10.0
+var reduction_rate: float = 5.0
+var max_sound_perception: float = 50.0
 
 var detection_meter: float = 0.0
 var current_sound_modifier: float = 0.0
@@ -13,6 +13,12 @@ var current_sound_modifier: float = 0.0
 var player_in_fov: bool = false # Add this line
 
 signal player_detected
+signal sound_heard(sound_position)
+
+func _ready():
+	if not is_instance_valid(player):
+		return
+	player.made_sound.connect(hear_sound)
 
 func _process(delta: float):
 	if not is_instance_valid(player):
@@ -52,10 +58,10 @@ func _process(delta: float):
 
 # Call this from a player's sound-generating action
 func hear_sound(sound_level: float, sound_position: Vector2):
-	print("Heard a ", sound_level, " at position ", sound_position)
 	var distance: float = global_position.distance_to(sound_position)
 	if distance < sound_level:
 		current_sound_modifier += (1.0 - (distance / sound_level)) * max_sound_perception
+		emit_signal("sound_heard", sound_position)
 
 # Connect these two functions to your CollisionPolygon2D's body_entered and body_exited signals
 func _on_fov_body_entered(body):
