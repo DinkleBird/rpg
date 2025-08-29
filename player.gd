@@ -7,6 +7,12 @@ extends CharacterBody2D
 @export var max_zoom = 3.0
 @export var attack_cooldown = 0.5
 
+@export var sprint_sound_level = 200.0
+@export var walk_sound_level = 100.0
+@export var crouch_sound_level = 20.0
+
+signal made_sound(sound_level, sound_position)
+
 @onready var camera = $Camera2D
 @onready var animated_sprite = $AnimatedSprite2D
 @onready var attack_hitbox = $AttackHitbox
@@ -105,11 +111,18 @@ func handle_movement():
 	if direction_input != Vector2.ZERO:
 		current_state = State.RUN
 		var current_speed = speed
+		var sound_level = walk_sound_level
 		if Input.is_action_pressed("sprint"):
 			current_speed *= sprint_speed_multiplier
 			stealth_component.set_player_state(stealth_component.PlayerState.SPRINTING)
+			sound_level = sprint_sound_level
+		elif is_crouching:
+			stealth_component.set_player_state(stealth_component.PlayerState.SNEAKING)
+			sound_level = crouch_sound_level
 		else:
 			stealth_component.set_player_state(stealth_component.PlayerState.WALKING)
+
+		emit_signal("made_sound", sound_level, global_position)
 
 		velocity = direction_input.normalized() * current_speed
 		update_facing_direction(direction_input)

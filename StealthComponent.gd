@@ -27,7 +27,6 @@ func calculate_stealth_rating():
 	stealth_rating = base_stealth + sneak_skill + equipment_modifier + state_bonus - light_modifier
 	# Ensure stealth rating doesn't go below a certain threshold
 	stealth_rating = max(0, stealth_rating)
-	print("Stealth Rating updated: ", stealth_rating)
 
 func set_player_state(new_state: PlayerState):
 	if current_state != new_state:

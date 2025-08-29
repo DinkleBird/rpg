@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://bqkg6nbs0ndnt" path="res://player.tscn" id="1_ig7tw"]
 [ext_resource type="PackedScene" uid="uid://vhews5o0b0s8" path="res://environment/Rock.tscn" id="2_0xm2m"]
 [ext_resource type="PackedScene" uid="uid://7btmust8ydkn" path="res://enemy_base.tscn" id="3_h2yge"]
-[ext_resource type="PackedScene" uid="uid://dqi4n86383n4" path="res://ui/GameUI.tscn" id="4_abcde"]
+[ext_resource type="PackedScene" path="res://ui/GameUI.tscn" id="4_abcde"]
 
 [node name="Main" type="Node2D"]
 

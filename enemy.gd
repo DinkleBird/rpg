@@ -192,3 +192,6 @@ func _on_attacked_from_direction(attacker_position: Vector2):
 	
 	if current_state != State.DEATH:
 		current_state = State.IDLE
+
+func _on_player_made_sound(sound_level, sound_position):
+	perception_component.hear_sound(sound_level, sound_position)

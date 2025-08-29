@@ -52,6 +52,7 @@ func _process(delta: float):
 
 # Call this from a player's sound-generating action
 func hear_sound(sound_level: float, sound_position: Vector2):
+	print("Heard a ", sound_level, " at position ", sound_position)
 	var distance: float = global_position.distance_to(sound_position)
 	if distance < sound_level:
 		current_sound_modifier += (1.0 - (distance / sound_level)) * max_sound_perception
