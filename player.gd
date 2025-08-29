@@ -12,6 +12,7 @@ extends CharacterBody2D
 @export var crouch_sound_level = 20.0
 
 signal made_sound(sound_level, sound_position)
+signal player_died
 
 @onready var camera = $Camera2D
 @onready var animated_sprite = $AnimatedSprite2D
@@ -169,6 +170,7 @@ func attack():
 	if is_undetected:
 		calculated_damage *= 3 # Sneak attack bonus
 		print("Sneak Attack!")
+		is_undetected = false # Reset after sneak attack
 	
 	_damage_to_deal_on_attack = calculated_damage # Store the calculated damage
 	
@@ -196,6 +198,7 @@ func _on_attack_hitbox_body_entered(body):
 
 func _on_died():
 	current_state = State.DEATH
+	emit_signal("player_died")
 	# After a 1 second delay, call the respawn function
 	get_tree().create_timer(1.0).timeout.connect(respawn)
 

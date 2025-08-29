@@ -262,6 +262,9 @@ radius = 100.0
 scale = Vector2(1.5, 1.5)
 script = ExtResource("1_8nqel")
 search_angle_range = 360.0
+generate_patrol_points = true
+patrol_points_to_generate = 10
+attack_range_radius = 6.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 scale = Vector2(0.18, 0.18)
@@ -294,6 +297,12 @@ shape = SubResource("CircleShape2D_aggro")
 
 [node name="SearchTimer" type="Timer" parent="."]
 wait_time = 5.0
+one_shot = true
+
+[node name="PatrolWaitTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="IgnorePlayerTimer" type="Timer" parent="."]
 one_shot = true
 
 [connection signal="body_entered" from="AttackRange" to="." method="_on_attack_range_body_entered"]

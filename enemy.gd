@@ -14,6 +14,16 @@ extends CharacterBody2D
 @export var reduction_rate: float = 5.0
 @export var max_sound_perception: float = 50.0
 
+@export_group("Patrol")
+@export var patrol_points: Array[Vector2] = []
+@export var generate_patrol_points = false
+@export var patrol_generation_radius = 200.0
+@export var patrol_points_to_generate = 4
+@export var min_patrol_wait_time = 3.0
+@export var max_patrol_wait_time = 15.0
+
+@export_group("Attack")
+@export var attack_range_radius: float = 24.7027
 
 @onready var health_component = $HealthComponent
 @onready var animated_sprite = $AnimatedSprite2D
@@ -21,9 +31,14 @@ extends CharacterBody2D
 @onready var attack_cooldown_timer = $AttackCooldownTimer
 @onready var perception_component = $PerceptionComponent
 @onready var search_timer = $SearchTimer
+@onready var patrol_wait_timer = $PatrolWaitTimer
+@onready var ignore_player_timer = $IgnorePlayerTimer
+@onready var collision_shape = $CollisionShape2D
 
 enum State {
 	IDLE,
+	PATROL,
+	PATROL_WAITING,
 	WALK,
 	ATTACK,
 	HURT,
@@ -38,18 +53,27 @@ var player_detected = false
 var _current_target: CharacterBody2D = null
 var last_movement_direction = Vector2.RIGHT
 var last_known_position: Vector2
+var patrol_index = 0
+var start_position: Vector2
 
 var hitbox_positions = {
-	"right": Vector2(20, 0),
-	"left": Vector2(-20, 0)
+	"down": Vector2(0, 20),
+	"up": Vector2(0, -20),
+	"left": Vector2(-20, 0),
+	"right": Vector2(20, 0)
 }
 
 func _ready():
+	start_position = global_position
 	health_component.died.connect(_on_died)
 	animated_sprite.animation_finished.connect(_on_animation_finished)
 	perception_component.player_detected.connect(_on_player_detected)
 	perception_component.sound_heard.connect(_on_sound_heard)
 	search_timer.timeout.connect(_on_search_timer_timeout)
+	patrol_wait_timer.timeout.connect(_on_patrol_wait_timer_timeout)
+	
+	if generate_patrol_points:
+		_generate_patrol_points()
 	
 	var fov = perception_component.get_node("FieldOfView")
 	fov.body_entered.connect(_on_fov_body_entered)
@@ -62,8 +86,57 @@ func _ready():
 	perception_component.reduction_rate = reduction_rate
 	perception_component.max_sound_perception = max_sound_perception
 	
+	# Set attack range radius
+	attack_range.get_node("CollisionShape2D").shape.radius = attack_range_radius
+
+func _generate_patrol_points():
+	patrol_points.clear()
+	var space_state = get_world_2d().direct_space_state
+	for i in range(patrol_points_to_generate):
+		var random_direction = Vector2.RIGHT.rotated(randf_range(0, 2 * PI))
+		var ray_origin = start_position
+		var ray_end = ray_origin + random_direction * patrol_generation_radius
+		var query = PhysicsRayQueryParameters2D.create(ray_origin, ray_end)
+		var result = space_state.intersect_ray(query)
+		
+		if result:
+			# Add a point slightly before the collision point
+			patrol_points.append(result.position - random_direction * 20)
+		else:
+			# Add the point at the full length of the ray
+			patrol_points.append(ray_end)
+
+
 func _physics_process(_delta):
 	match current_state:
+		State.IDLE:
+			velocity = Vector2.ZERO
+			if player_detected and not player_in_attack_range:
+				current_state = State.WALK
+			elif player_detected and player_in_attack_range and attack_cooldown_timer.is_stopped():
+				current_state = State.ATTACK
+				update_animation()
+			elif not player_detected and not patrol_points.is_empty():
+				current_state = State.PATROL
+		State.PATROL:
+			if not patrol_points.is_empty():
+				var target_point = patrol_points[patrol_index]
+				# Patrol points are now global, no need to add start_position
+				var direction_to_target = (target_point - global_position).normalized()
+				velocity = direction_to_target * speed
+				move_and_slide()
+				
+				if global_position.distance_to(target_point) < 10:
+					velocity = Vector2.ZERO
+					current_state = State.PATROL_WAITING
+					patrol_wait_timer.wait_time = randf_range(min_patrol_wait_time, max_patrol_wait_time)
+					patrol_wait_timer.start()
+			else:
+				velocity = Vector2.ZERO
+				current_state = State.IDLE
+		State.PATROL_WAITING:
+			velocity = Vector2.ZERO
+
 		State.WALK:
 			if _current_target:
 				if player_in_attack_range:
@@ -94,13 +167,6 @@ func _physics_process(_delta):
 			elif perception_component.rotation_degrees < base_angle - 1:
 				animated_sprite.flip_h = true
 
-		State.IDLE:
-			velocity = Vector2.ZERO
-			if player_detected and not player_in_attack_range:
-				current_state = State.WALK
-			elif player_detected and player_in_attack_range and attack_cooldown_timer.is_stopped():
-				current_state = State.ATTACK
-				update_animation()
 		State.ATTACK:
 			velocity = Vector2.ZERO
 		State.HURT:
@@ -118,12 +184,24 @@ func _physics_process(_delta):
 		update_animation()
 
 func _on_player_detected():
+	if not ignore_player_timer.is_stopped():
+		return
 	player_detected = true
 	search_timer.stop()
 	var players_in_group = get_tree().get_nodes_in_group("player")
 	if not players_in_group.is_empty():
 		_current_target = players_in_group[0]
+		if not _current_target.player_died.is_connected(_on_player_died):
+			_current_target.player_died.connect(_on_player_died)
 		last_known_position = _current_target.global_position
+
+func _on_player_died():
+	if _current_target and _current_target.player_died.is_connected(_on_player_died):
+		_current_target.player_died.disconnect(_on_player_died)
+	_current_target = null
+	player_detected = false
+	current_state = State.SEARCHING
+	ignore_player_timer.start(5.0)
 
 func _on_sound_heard(sound_position: Vector2):
 	if not player_detected: # Only react to sound if not already chasing the player
@@ -154,25 +232,43 @@ func _on_search_timer_timeout():
 	current_state = State.IDLE
 	player_detected = false
 
+func _on_patrol_wait_timer_timeout():
+	patrol_index = (patrol_index + 1) % patrol_points.size()
+	current_state = State.PATROL
+
 func update_animation():
 	var anim_name = "Idle"
-	if current_state == State.WALK or current_state == State.SEARCHING:
+	if current_state == State.WALK or current_state == State.SEARCHING or current_state == State.PATROL:
 		anim_name = "Walk"
-		if velocity.x > 0:
-			animated_sprite.flip_h = false
-			attack_range.position = hitbox_positions["right"]
-		elif velocity.x < 0:
-			animated_sprite.flip_h = true
-			attack_range.position = hitbox_positions["left"]
+		if abs(last_movement_direction.y) > abs(last_movement_direction.x):
+			if last_movement_direction.y > 0:
+				attack_range.position = hitbox_positions["down"]
+			else:
+				attack_range.position = hitbox_positions["up"]
+		else:
+			if last_movement_direction.x > 0:
+				animated_sprite.flip_h = false
+				attack_range.position = hitbox_positions["right"]
+			else:
+				animated_sprite.flip_h = true
+				attack_range.position = hitbox_positions["left"]
 	elif current_state == State.LOOKING_AROUND:
 		anim_name = "Idle"
 	elif current_state == State.ATTACK:
 		var attack_animations = ["Attack01", "Attack02"]
 		anim_name = attack_animations[randi() % attack_animations.size()]
-		if animated_sprite.flip_h == false: # Facing right
-			attack_range.position = hitbox_positions["right"]
-		else: # Facing left
-			attack_range.position = hitbox_positions["left"]
+		if abs(last_movement_direction.y) > abs(last_movement_direction.x):
+			if last_movement_direction.y > 0:
+				attack_range.position = hitbox_positions["down"]
+			else:
+				attack_range.position = hitbox_positions["up"]
+		else:
+			if last_movement_direction.x > 0:
+				animated_sprite.flip_h = false
+				attack_range.position = hitbox_positions["right"]
+			else:
+				animated_sprite.flip_h = true
+				attack_range.position = hitbox_positions["left"]
 	elif current_state == State.DEATH:
 		anim_name = "Death"
 	
@@ -189,25 +285,24 @@ func _on_animation_finished():
 		queue_free()
 	elif animated_sprite.animation.begins_with("Attack"):
 		if player_in_attack_range and _current_target and _current_target.has_node("HealthComponent"):
-			var direction_to_player = (_current_target.global_position - global_position).normalized()
-			var dot_product = direction_to_player.dot(Vector2(1, 0) if not animated_sprite.flip_h else Vector2(-1, 0))
-			if dot_product > 0.5:
-				_current_target.get_node("HealthComponent").take_damage(10)
+			_current_target.get_node("HealthComponent").take_damage(10)
 		attack_cooldown_timer.start(attack_cooldown)
 		current_state = State.IDLE
 
 func _on_attack_range_body_entered(body):
 	if body.is_in_group("player"):
-		var direction_to_player = (body.global_position - global_position).normalized()
-		var dot_product = direction_to_player.dot(Vector2(1, 0) if not animated_sprite.flip_h else Vector2(-1, 0))
-		if dot_product > 0.5:
-			player_in_attack_range = true
-		else:
-			player_in_attack_range = false
+		player_in_attack_range = true
 
 func _on_attack_range_body_exited(body):
 	if body.is_in_group("player"):
 		player_in_attack_range = false
+
+func _on_aggro_range_body_entered(body):
+	if body.is_in_group("player"):
+		_on_player_detected()
+
+func _on_aggro_range_body_exited(_body):
+	pass # Add logic here if needed
 
 func _on_attacked_from_direction(attacker_position: Vector2):
 	var direction_to_attacker = (attacker_position - global_position).normalized()
