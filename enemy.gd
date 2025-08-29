@@ -8,7 +8,7 @@ extends CharacterBody2D
 @export var search_speed = 2.0
 
 @export_group("Perception")
-@export var base_perception: float = 50.0
+@export var base_perception: float = 70.0
 @export var line_of_sight_bonus: float = 20.0
 @export var detection_rate: float = 10.0
 @export var reduction_rate: float = 5.0
@@ -71,6 +71,10 @@ func _ready():
 	perception_component.sound_heard.connect(_on_sound_heard)
 	search_timer.timeout.connect(_on_search_timer_timeout)
 	patrol_wait_timer.timeout.connect(_on_patrol_wait_timer_timeout)
+	
+	var player = get_tree().get_first_node_in_group("player")
+	if player:
+		player.made_sound.connect(perception_component.hear_sound)
 	
 	if generate_patrol_points:
 		_generate_patrol_points()

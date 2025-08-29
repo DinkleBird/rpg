@@ -15,11 +15,6 @@ var player_in_fov: bool = false # Add this line
 signal player_detected
 signal sound_heard(sound_position)
 
-func _ready():
-	if not is_instance_valid(player):
-		return
-	player.made_sound.connect(hear_sound)
-
 func _process(delta: float):
 	if not is_instance_valid(player):
 		return
