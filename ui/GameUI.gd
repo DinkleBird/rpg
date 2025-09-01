@@ -22,6 +22,14 @@ func _ready():
 	skills_screen = skills_screen_scene.instantiate()
 	add_child(skills_screen)
 
+	$NetworkUI/CreateServerButton.pressed.connect(NetworkManager.create_server)
+	$NetworkUI/JoinServerButton.pressed.connect(func(): NetworkManager.join_server($NetworkUI/IPAddressLineEdit.text))
+	NetworkManager.connected_to_server.connect(_on_player_connected)
+	NetworkManager.player_connected.connect(_on_player_connected)
+
+func _on_player_connected(_id = 0):
+	$NetworkUI.hide()
+
 func _input(event):
 	# Example: Toggle inventory with "i" key
 	if event.is_action_pressed("ui_inventory"):

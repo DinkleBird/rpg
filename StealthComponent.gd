@@ -12,6 +12,7 @@ enum PlayerState { STANDING, WALKING, SPRINTING, SNEAKING }
 
 var current_state: PlayerState = PlayerState.WALKING
 var stealth_rating: float = 0.0
+var is_dirty: bool = true
 
 func _ready():
 	calculate_stealth_rating()
@@ -27,17 +28,20 @@ func calculate_stealth_rating():
 	stealth_rating = base_stealth + sneak_skill + equipment_modifier + state_bonus - light_modifier
 	# Ensure stealth rating doesn't go below a certain threshold
 	stealth_rating = max(0, stealth_rating)
+	is_dirty = false
 
 func set_player_state(new_state: PlayerState):
 	if current_state != new_state:
 		current_state = new_state
-		calculate_stealth_rating()
+		is_dirty = true
 
 func update_light_modifier(light_level: float):
 	# Assuming light_level is from 0 (dark) to 1 (bright)
 	# This will be a penalty, so we multiply by a factor
 	light_modifier = light_level * 20.0 # Example factor
-	calculate_stealth_rating()
+	is_dirty = true
 
 func get_stealth_rating() -> float:
+	if is_dirty:
+		calculate_stealth_rating()
 	return stealth_rating

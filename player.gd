@@ -9,7 +9,7 @@ extends CharacterBody2D
 
 @export var sprint_sound_level = 200.0
 @export var walk_sound_level = 100.0
-@export var crouch_sound_level = 20.0
+@export var crouch_sound_level = 5.0
 
 signal made_sound(sound_level, sound_position)
 signal player_died
@@ -22,6 +22,7 @@ signal player_died
 @onready var attack_cooldown_timer = $AttackCooldownTimer
 @onready var health_component = $HealthComponent
 @onready var stealth_component = $StealthComponent
+@onready var multiplayer_synchronizer = $MultiplayerSynchronizer
 
 enum State {
 	IDLE,
@@ -38,8 +39,7 @@ var target_zoom = 2.0
 var start_position: Vector2
 var is_blocking = false
 var is_crouching = false
-var is_undetected = true # Assume undetected by default
-var _damage_to_deal_on_attack = 0 # Stores damage to be dealt on attack
+
 
 var hitbox_positions = {
 	"down": Vector2(0, 20),
@@ -49,6 +49,7 @@ var hitbox_positions = {
 }
 
 func _ready():
+	multiplayer_synchronizer.set_multiplayer_authority(str(name).to_int())
 	add_to_group("player") # Ensure player is in the "player" group
 	start_position = global_position
 	attack_timer.timeout.connect(_on_attack_timer_timeout)
@@ -57,6 +58,8 @@ func _ready():
 
 
 func _unhandled_input(event):
+	if multiplayer.get_unique_id() != multiplayer_synchronizer.get_multiplayer_authority():
+		return
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
 			target_zoom += zoom_speed
@@ -65,6 +68,9 @@ func _unhandled_input(event):
 		target_zoom = clamp(target_zoom, min_zoom, max_zoom)
 
 func _physics_process(delta):
+	if multiplayer.get_unique_id() != multiplayer_synchronizer.get_multiplayer_authority():
+		return
+
 	match current_state:
 		State.DEATH:
 			velocity = Vector2.ZERO
@@ -165,15 +171,11 @@ func update_animation():
 		animated_sprite.play(anim_name)
 
 func attack():
-	print("Attack!")
-	var calculated_damage = 10 # Base damage
-	if is_undetected:
-		calculated_damage *= 3 # Sneak attack bonus
-		print("Sneak Attack!")
-		is_undetected = false # Reset after sneak attack
-	
-	_damage_to_deal_on_attack = calculated_damage # Store the calculated damage
-	
+	rpc("rpc_attack")
+
+@rpc("any_peer", "call_local")
+func rpc_attack():
+	# Damage is now calculated in _on_attack_hitbox_body_entered
 	attack_hitbox.position = hitbox_positions[facing_direction]
 	attack_cooldown_timer.start(attack_cooldown)
 	attack_hitbox_shape.disabled = false
@@ -189,9 +191,14 @@ func _on_animation_finished():
 		pass
 
 func _on_attack_hitbox_body_entered(body):
-	print("Player attack hitbox entered body: ", body.name)
+	if not multiplayer.is_server():
+		return
 	if body.is_in_group("enemy"):
-		body.get_node("HealthComponent").take_damage(_damage_to_deal_on_attack)
+		var calculated_damage = 10 # Base damage
+		if not body.player_detected:
+			calculated_damage *= 3 # Sneak attack bonus
+
+		body.get_node("HealthComponent").take_damage(calculated_damage)
 		# Call the new function on the enemy to make it turn and re-check
 		if body.has_method("_on_attacked_from_direction"):
 			body._on_attacked_from_direction(global_position)
@@ -208,5 +215,4 @@ func respawn():
 	current_state = State.IDLE
 	$HealthBar.visible = true
 
-func set_undetected(value):
-	is_undetected = value
+

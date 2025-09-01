@@ -13,6 +13,29 @@ texture_margin_bottom = 8.0
 [node name="GameUI" type="CanvasLayer"]
 script = ExtResource("1_abcde")
 
+[node name="NetworkUI" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_right = 200.0
+offset_bottom = 40.0
+grow_horizontal = 2
+alignment = 1
+
+[node name="CreateServerButton" type="Button" parent="NetworkUI"]
+layout_mode = 2
+text = "Create Server"
+
+[node name="IPAddressLineEdit" type="LineEdit" parent="NetworkUI"]
+layout_mode = 2
+placeholder_text = "Enter IP Address"
+
+[node name="JoinServerButton" type="Button" parent="NetworkUI"]
+layout_mode = 2
+text = "Join Server"
+
 [node name="BottomBar" type="Panel" parent="."]
 anchor_top = 1.0
 anchor_right = 1.0

@@ -24,27 +24,34 @@ extends CharacterBody2D
 
 @export_group("Attack")
 @export var attack_range_radius: float = 24.7027
+@export var attack_distance: float = 30.0 # Optimal distance to attack from
 
 @onready var health_component = $HealthComponent
 @onready var animated_sprite = $AnimatedSprite2D
 @onready var attack_range = $AttackRange
-@onready var attack_cooldown_timer = $AttackCooldownTimer
+# @onready var attack_cooldown_timer = $AttackCooldownTimer # REMOVED
 @onready var perception_component = $PerceptionComponent
 @onready var search_timer = $SearchTimer
 @onready var patrol_wait_timer = $PatrolWaitTimer
 @onready var ignore_player_timer = $IgnorePlayerTimer
 @onready var collision_shape = $CollisionShape2D
 
+var attack_cooldown_timer: Timer # Declare attack_cooldown_timer as a member variable
+
+var _lost_player_timer: Timer
+var _attack_timeout_timer: Timer
+
 enum State {
 	IDLE,
 	PATROL,
 	PATROL_WAITING,
-	WALK,
 	ATTACK,
 	HURT,
 	DEATH,
 	SEARCHING,
-	LOOKING_AROUND
+	LOOKING_AROUND,
+	ALERT,
+	ALERT_LOST_PLAYER # New state
 }
 
 var current_state = State.IDLE
@@ -55,6 +62,19 @@ var last_movement_direction = Vector2.RIGHT
 var last_known_position: Vector2
 var patrol_index = 0
 var start_position: Vector2
+var can_attack = true # New boolean flag for attack cooldown
+var is_attacking = false
+
+func _set_state(new_state):
+	if current_state != new_state:
+		
+		# Handle attack timeout timer
+		if new_state == State.ATTACK:
+			_attack_timeout_timer.start(attack_cooldown * 3.0) # Give it significantly more time than cooldown
+		elif current_state == State.ATTACK and new_state != State.ATTACK:
+			_attack_timeout_timer.stop()
+		
+		current_state = new_state
 
 var hitbox_positions = {
 	"down": Vector2(0, 20),
@@ -65,6 +85,21 @@ var hitbox_positions = {
 
 func _ready():
 	start_position = global_position
+
+	# Initialize attack_cooldown_timer in code
+	attack_cooldown_timer = Timer.new()
+	add_child(attack_cooldown_timer)
+	attack_cooldown_timer.timeout.connect(_on_attack_cooldown_timer_timeout)
+
+	_lost_player_timer = Timer.new()
+	add_child(_lost_player_timer)
+	_lost_player_timer.timeout.connect(_on_lost_player_timer_timeout)
+
+	_attack_timeout_timer = Timer.new()
+	add_child(_attack_timeout_timer)
+	_attack_timeout_timer.timeout.connect(_on_attack_timeout_timer_timeout)
+
+
 	health_component.died.connect(_on_died)
 	animated_sprite.animation_finished.connect(_on_animation_finished)
 	perception_component.player_detected.connect(_on_player_detected)
@@ -115,51 +150,66 @@ func _physics_process(_delta):
 	match current_state:
 		State.IDLE:
 			velocity = Vector2.ZERO
-			if player_detected and not player_in_attack_range:
-				current_state = State.WALK
-			elif player_detected and player_in_attack_range and attack_cooldown_timer.is_stopped():
-				current_state = State.ATTACK
-				update_animation()
-			elif not player_detected and not patrol_points.is_empty():
-				current_state = State.PATROL
+			if player_detected:
+				_set_state(State.ALERT)
+			elif not patrol_points.is_empty():
+				_set_state(State.PATROL)
 		State.PATROL:
 			if not patrol_points.is_empty():
 				var target_point = patrol_points[patrol_index]
-				# Patrol points are now global, no need to add start_position
 				var direction_to_target = (target_point - global_position).normalized()
 				velocity = direction_to_target * speed
 				move_and_slide()
 				
 				if global_position.distance_to(target_point) < 10:
 					velocity = Vector2.ZERO
-					current_state = State.PATROL_WAITING
+					_set_state(State.PATROL_WAITING)
 					patrol_wait_timer.wait_time = randf_range(min_patrol_wait_time, max_patrol_wait_time)
 					patrol_wait_timer.start()
 			else:
 				velocity = Vector2.ZERO
-				current_state = State.IDLE
+				_set_state(State.IDLE)
 		State.PATROL_WAITING:
 			velocity = Vector2.ZERO
+		State.ALERT:
+			if _current_target and is_instance_valid(_current_target):
+				var distance_to_player = global_position.distance_to(_current_target.global_position)
 
-		State.WALK:
-			if _current_target:
-				if player_in_attack_range:
-					current_state = State.IDLE
-				else:
-					last_known_position = _current_target.global_position
-					var direction_to_player = (_current_target.global_position - global_position).normalized()
-					velocity = direction_to_player * speed
-					move_and_slide()
+				if player_in_attack_range and can_attack:
+					_set_state(State.ATTACK)
+				elif can_attack:
+					if distance_to_player > attack_distance + 5: # Move closer if too far
+						last_known_position = _current_target.global_position
+						var direction_to_player = (_current_target.global_position - global_position).normalized()
+						velocity = direction_to_player * speed
+						move_and_slide()
+						_lost_player_timer.stop() # Stop timer if player is in sight
+					elif distance_to_player < attack_distance - 5: # Move away if too close
+						last_known_position = _current_target.global_position
+						var direction_away_from_player = (global_position - _current_target.global_position).normalized()
+						velocity = direction_away_from_player * speed
+						move_and_slide()
+						_lost_player_timer.stop() # Stop timer if player is in sight
+					else: # Within optimal attack distance, stop and wait for cooldown
+						velocity = Vector2.ZERO
+						_lost_player_timer.stop() # Stop timer if player is in sight
+				else: # Not can_attack, so stop movement
+					velocity = Vector2.ZERO
 			else:
+				# Player lost or invalid, transition to ALERT_LOST_PLAYER
+				_set_state(State.ALERT_LOST_PLAYER)
+				if _lost_player_timer.is_stopped():
+					_lost_player_timer.start(2.0) # Give a short grace period before searching
 				velocity = Vector2.ZERO
-				current_state = State.IDLE
+		State.ALERT_LOST_PLAYER:
+			velocity = Vector2.ZERO # Stay put and wait for timer to transition to SEARCHING
 		State.SEARCHING:
 			var direction_to_last_known = (last_known_position - global_position).normalized()
 			velocity = direction_to_last_known * speed
 			move_and_slide()
 			if global_position.distance_to(last_known_position) < 10:
 				velocity = Vector2.ZERO
-				current_state = State.LOOKING_AROUND
+				_set_state(State.LOOKING_AROUND)
 				search_timer.start(search_duration)
 		State.LOOKING_AROUND:
 			velocity = Vector2.ZERO
@@ -173,6 +223,10 @@ func _physics_process(_delta):
 
 		State.ATTACK:
 			velocity = Vector2.ZERO
+			if not is_attacking:
+				is_attacking = true
+				can_attack = false
+				update_animation()
 		State.HURT:
 			pass
 		State.DEATH:
@@ -184,7 +238,7 @@ func _physics_process(_delta):
 	if current_state != State.LOOKING_AROUND:
 		perception_component.rotation = last_movement_direction.angle()
 	
-	if current_state != State.ATTACK and current_state != State.DEATH:
+	if current_state != State.ATTACK and current_state != State.DEATH and attack_cooldown_timer.is_stopped():
 		update_animation()
 
 func _on_player_detected():
@@ -192,57 +246,68 @@ func _on_player_detected():
 		return
 	player_detected = true
 	search_timer.stop()
-	var players_in_group = get_tree().get_nodes_in_group("player")
-	if not players_in_group.is_empty():
-		_current_target = players_in_group[0]
+	_lost_player_timer.stop() # Stop lost player timer if player is re-detected
+	
+	_current_target = perception_component.get_closest_player()
+
+	if _current_target and is_instance_valid(_current_target):
 		if not _current_target.player_died.is_connected(_on_player_died):
 			_current_target.player_died.connect(_on_player_died)
 		last_known_position = _current_target.global_position
+		_set_state(State.ALERT) # Transition to ALERT state
 
 func _on_player_died():
 	if _current_target and _current_target.player_died.is_connected(_on_player_died):
 		_current_target.player_died.disconnect(_on_player_died)
 	_current_target = null
 	player_detected = false
-	current_state = State.SEARCHING
+	_set_state(State.SEARCHING)
 	ignore_player_timer.start(5.0)
+	_lost_player_timer.stop() # Stop lost player timer if player dies
 
 func _on_sound_heard(sound_position: Vector2):
-	if not player_detected: # Only react to sound if not already chasing the player
-		last_known_position = sound_position
-		current_state = State.SEARCHING
-		var direction_to_sound = (sound_position - global_position).normalized()
-		if direction_to_sound.x > 0:
-			animated_sprite.flip_h = false
-		elif direction_to_sound.x < 0:
-			animated_sprite.flip_h = true
+	if current_state == State.ALERT or current_state == State.ATTACK:
+		return # Already in alert/attack state, sound won't change much
+	
+	last_known_position = sound_position
+	_set_state(State.SEARCHING)
+	var direction_to_sound = (sound_position - global_position).normalized()
+	if direction_to_sound.x > 0:
+		animated_sprite.flip_h = false
+	elif direction_to_sound.x < 0:
+		animated_sprite.flip_h = true
 
 
 func _on_fov_body_entered(body):
 	if body.is_in_group("player"):
-		perception_component.player_in_fov = true
+		perception_component.set_player_in_fov(true)
+		# If enemy was searching or looking around, and player is seen, go to ALERT
 		if current_state == State.SEARCHING or current_state == State.LOOKING_AROUND:
-			current_state = State.WALK
+			_set_state(State.ALERT)
 			search_timer.stop()
+			_lost_player_timer.stop()
 
 
 func _on_fov_body_exited(body):
 	if body.is_in_group("player"):
-		perception_component.player_in_fov = false
-		if player_detected:
-			current_state = State.SEARCHING
+		perception_component.set_player_in_fov(false)
+		# If player was detected and now out of FOV, start lost player timer
+		if player_detected and current_state == State.ALERT:
+			_set_state(State.ALERT_LOST_PLAYER)
+			if _lost_player_timer.is_stopped():
+				_lost_player_timer.start(2.0) # Start timer to transition to SEARCHING
 
 func _on_search_timer_timeout():
-	current_state = State.IDLE
+	_set_state(State.IDLE)
 	player_detected = false
 
 func _on_patrol_wait_timer_timeout():
 	patrol_index = (patrol_index + 1) % patrol_points.size()
-	current_state = State.PATROL
+	_set_state(State.PATROL)
 
 func update_animation():
 	var anim_name = "Idle"
-	if current_state == State.WALK or current_state == State.SEARCHING or current_state == State.PATROL:
+	if current_state == State.ALERT or current_state == State.SEARCHING or current_state == State.PATROL:
 		anim_name = "Walk"
 		if abs(last_movement_direction.y) > abs(last_movement_direction.x):
 			if last_movement_direction.y > 0:
@@ -277,10 +342,12 @@ func update_animation():
 		anim_name = "Death"
 	
 	if animated_sprite.animation != anim_name:
-		animated_sprite.play(anim_name)
+		# Only play if the animation is different, or if it's an attack animation that needs to restart
+		if not (current_state == State.ATTACK and animated_sprite.animation.begins_with("Attack") and animated_sprite.is_playing()):
+			animated_sprite.play(anim_name)
 
 func _on_died():
-	current_state = State.DEATH
+	_set_state(State.DEATH)
 	animated_sprite.play("Death")
 	set_physics_process(false)
 
@@ -288,10 +355,11 @@ func _on_animation_finished():
 	if animated_sprite.animation == "Death":
 		queue_free()
 	elif animated_sprite.animation.begins_with("Attack"):
+		is_attacking = false
 		if player_in_attack_range and _current_target and _current_target.has_node("HealthComponent"):
 			_current_target.get_node("HealthComponent").take_damage(10)
 		attack_cooldown_timer.start(attack_cooldown)
-		current_state = State.IDLE
+		_set_state(State.ALERT)
 
 func _on_attack_range_body_entered(body):
 	if body.is_in_group("player"):
@@ -301,14 +369,14 @@ func _on_attack_range_body_exited(body):
 	if body.is_in_group("player"):
 		player_in_attack_range = false
 
-func _on_aggro_range_body_entered(body):
-	if body.is_in_group("player"):
-		_on_player_detected()
 
-func _on_aggro_range_body_exited(_body):
-	pass # Add logic here if needed
 
 func _on_attacked_from_direction(attacker_position: Vector2):
+	print("--- Enemy _on_attacked_from_direction ---")
+	print("attacker_position: ", attacker_position)
+	if current_state == State.DEATH:
+		return
+
 	var direction_to_attacker = (attacker_position - global_position).normalized()
 	last_movement_direction = direction_to_attacker
 	perception_component.rotation = last_movement_direction.angle()
@@ -317,9 +385,26 @@ func _on_attacked_from_direction(attacker_position: Vector2):
 		animated_sprite.flip_h = false
 	elif direction_to_attacker.x < 0:
 		animated_sprite.flip_h = true
-	
-	if current_state != State.DEATH:
-		current_state = State.IDLE
+
+	# Don't immediately go to ALERT. Instead, go to SEARCHING.
+	# This makes the enemy investigate the direction of the attack.
+	if current_state != State.ALERT and current_state != State.ATTACK:
+		last_known_position = attacker_position
+		_set_state(State.SEARCHING)
+		player_detected = true
 
 func _on_player_made_sound(sound_level, sound_position):
 	perception_component.hear_sound(sound_level, sound_position)
+
+func _on_lost_player_timer_timeout():
+	_set_state(State.SEARCHING)
+	player_detected = false
+	_lost_player_timer.stop() # Ensure the timer stops after timeout
+
+func _on_attack_timeout_timer_timeout():
+	_set_state(State.ALERT)
+	# Optionally, you might want to reset attack cooldown here if it wasn't already
+	# attack_cooldown_timer.start(attack_cooldown)
+
+func _on_attack_cooldown_timer_timeout():
+	can_attack = true

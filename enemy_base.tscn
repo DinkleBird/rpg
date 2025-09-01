@@ -272,7 +272,7 @@ shape = SubResource("CapsuleShape2D_ehd03")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_someid")
-animation = &"Attack01"
+animation = &"Attack02"
 speed_scale = 2.6
 
 [node name="HealthComponent" type="Node" parent="."]
@@ -307,5 +307,3 @@ one_shot = true
 
 [connection signal="body_entered" from="AttackRange" to="." method="_on_attack_range_body_entered"]
 [connection signal="body_exited" from="AttackRange" to="." method="_on_attack_range_body_exited"]
-[connection signal="body_entered" from="AggroRange" to="." method="_on_aggro_range_body_entered"]
-[connection signal="body_exited" from="AggroRange" to="." method="_on_aggro_range_body_exited"]
