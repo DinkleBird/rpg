@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3 uid="uid://cwtignpg1lbah"]
 
-[ext_resource type="Script" path="res://ui/InventoryScreen.gd" id="1_abcde"]
+[ext_resource type="Script" uid="uid://10j4gwj1yrfq" path="res://ui/InventoryScreen.gd" id="1_abcde"]
 [ext_resource type="PackedScene" path="res://ui/ItemSlot.tscn" id="2_fghij"]
-[ext_resource type="Texture2D" path="res://ui/panel_background.png" id="3_jklmn"]
+[ext_resource type="Texture2D" uid="uid://dm0egcynjygli" path="res://ui/panel_background.png" id="3_jklmn"]
+[ext_resource type="Script" uid="uid://bnnahfmw56w33" path="res://ui/ResizeHandle.gd" id="4_30h5e"]
 
 [node name="InventoryScreen" type="Panel"]
 anchors_preset = 8
@@ -12,13 +13,15 @@ anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -250.0
 offset_top = -200.0
-offset_right = 250.0
-offset_bottom = 200.0
+offset_right = 145.0
+offset_bottom = 120.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_abcde")
 
 [node name="NinePatchRect" type="NinePatchRect" parent="."]
 layout_mode = 1
-anchors_preset = 15
+anchors_preset = -1
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
@@ -36,10 +39,12 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -220.0
-offset_top = -170.0
-offset_right = 220.0
+offset_left = -168.5
+offset_top = -129.0
+offset_right = 167.5
 offset_bottom = 170.0
+grow_horizontal = 2
+grow_vertical = 2
 columns = 5
 
 [node name="ItemSlot" parent="GridContainer" instance=ExtResource("2_fghij")]
@@ -101,3 +106,18 @@ layout_mode = 2
 
 [node name="ItemSlot20" parent="GridContainer" instance=ExtResource("2_fghij")]
 layout_mode = 2
+
+[node name="ResizeHandle" type="Control" parent="."]
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -40.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 1
+script = ExtResource("4_30h5e")

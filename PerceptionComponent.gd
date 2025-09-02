@@ -1,3 +1,4 @@
+# Filename: PerceptionComponent.gd
 extends Node2D
 
 @export var grace_period: float = 2.0
@@ -21,15 +22,15 @@ signal sound_heard(sound_position)
 func _ready():
 	grace_timer.wait_time = grace_period
 	grace_timer.one_shot = true
-	$PlayerDetectionRange.body_entered.connect(_on_player_detection_range_body_entered)
-	$PlayerDetectionRange.body_exited.connect(_on_player_detection_range_body_exited)
+	#$PlayerDetectionRange.body_entered.connect(_on_player_detection_range_body_entered)
+	#$PlayerDetectionRange.body_exited.connect(_on_player_detection_range_body_exited)
 
 func _process(delta: float):
 	if players_in_range.is_empty():
 		return
 
 	var closest_player = null
-	var closest_distance = 100000
+	var closest_distance = 100000.0
 
 	for player in players_in_range:
 		if not is_instance_valid(player):
@@ -80,14 +81,21 @@ func _process(delta: float):
 	# Decay sound modifier over time
 	current_sound_modifier = lerp(current_sound_modifier, 0.0, delta * 5.0) # Decay rate of 5.0
 
-# Call this from a player's sound-generating action
+# Corrected function to handle multiple sound sources
 func hear_sound(sound_level: float, sound_position: Vector2):
+	var max_modifier = 0.0
+	var sound_source_position = Vector2.ZERO
 	for player in players_in_range:
 		var distance: float = global_position.distance_to(player.global_position)
 		if distance < sound_level:
-			current_sound_modifier = (1.0 - (distance / sound_level)) * max_sound_perception
-			emit_signal("sound_heard", sound_position)
-			return
+			var modifier = (1.0 - (distance / sound_level)) * max_sound_perception
+			if modifier > max_modifier:
+				max_modifier = modifier
+				sound_source_position = player.global_position
+	
+	current_sound_modifier = max_modifier
+	if current_sound_modifier > 0:
+		emit_signal("sound_heard", sound_source_position)
 
 func set_player_in_fov(in_fov: bool):
 	player_in_fov = in_fov
@@ -106,7 +114,7 @@ func _on_fov_body_exited(body):
 
 func get_closest_player():
 	var closest_player = null
-	var closest_distance = 100000
+	var closest_distance = 100000.0
 
 	for player in players_in_range:
 		if not is_instance_valid(player):

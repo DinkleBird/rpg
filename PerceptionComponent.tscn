@@ -9,10 +9,11 @@ radius = 100.0
 script = ExtResource("1_abcde")
 
 [node name="FieldOfView" type="Area2D" parent="."]
-collision_layer = 0
+collision_layer = 2
+collision_mask = 2
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="FieldOfView"]
-polygon = PackedVector2Array(0, 0, 200, -82, 200, 82)
+polygon = PackedVector2Array(0, 0, 400, -200, 400, 200)
 
 [node name="GraceTimer" type="Timer" parent="."]
 
@@ -25,3 +26,5 @@ shape = SubResource("CircleShape2D_aggro")
 
 [connection signal="body_entered" from="FieldOfView" to="." method="_on_fov_body_entered"]
 [connection signal="body_exited" from="FieldOfView" to="." method="_on_fov_body_exited"]
+[connection signal="body_entered" from="PlayerDetectionRange" to="." method="_on_player_detection_range_body_entered"]
+[connection signal="body_exited" from="PlayerDetectionRange" to="." method="_on_player_detection_range_body_exited"]

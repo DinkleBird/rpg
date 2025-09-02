@@ -24,20 +24,18 @@ extends CharacterBody2D
 
 @export_group("Attack")
 @export var attack_range_radius: float = 24.7027
-@export var attack_distance: float = 30.0 # Optimal distance to attack from
+@export var attack_distance: float = 30.0
 
 @onready var health_component = $HealthComponent
 @onready var animated_sprite = $AnimatedSprite2D
 @onready var attack_range = $AttackRange
-# @onready var attack_cooldown_timer = $AttackCooldownTimer # REMOVED
 @onready var perception_component = $PerceptionComponent
 @onready var search_timer = $SearchTimer
 @onready var patrol_wait_timer = $PatrolWaitTimer
 @onready var ignore_player_timer = $IgnorePlayerTimer
 @onready var collision_shape = $CollisionShape2D
 
-var attack_cooldown_timer: Timer # Declare attack_cooldown_timer as a member variable
-
+var attack_cooldown_timer: Timer
 var _lost_player_timer: Timer
 var _attack_timeout_timer: Timer
 
@@ -51,7 +49,7 @@ enum State {
 	SEARCHING,
 	LOOKING_AROUND,
 	ALERT,
-	ALERT_LOST_PLAYER # New state
+	ALERT_LOST_PLAYER
 }
 
 var current_state = State.IDLE
@@ -62,15 +60,14 @@ var last_movement_direction = Vector2.RIGHT
 var last_known_position: Vector2
 var patrol_index = 0
 var start_position: Vector2
-var can_attack = true # New boolean flag for attack cooldown
+var can_attack = true
 var is_attacking = false
 
 func _set_state(new_state):
 	if current_state != new_state:
 		
-		# Handle attack timeout timer
 		if new_state == State.ATTACK:
-			_attack_timeout_timer.start(attack_cooldown * 3.0) # Give it significantly more time than cooldown
+			_attack_timeout_timer.start(attack_cooldown * 3.0)
 		elif current_state == State.ATTACK and new_state != State.ATTACK:
 			_attack_timeout_timer.stop()
 		
@@ -86,7 +83,6 @@ var hitbox_positions = {
 func _ready():
 	start_position = global_position
 
-	# Initialize attack_cooldown_timer in code
 	attack_cooldown_timer = Timer.new()
 	add_child(attack_cooldown_timer)
 	attack_cooldown_timer.timeout.connect(_on_attack_cooldown_timer_timeout)
@@ -107,26 +103,35 @@ func _ready():
 	search_timer.timeout.connect(_on_search_timer_timeout)
 	patrol_wait_timer.timeout.connect(_on_patrol_wait_timer_timeout)
 	
-	var player = get_tree().get_first_node_in_group("player")
-	if player:
-		player.made_sound.connect(perception_component.hear_sound)
-	
+	var players = get_tree().get_nodes_in_group("player")
+	if not players.is_empty():
+		for player in players:
+			if not player.made_sound.is_connected(perception_component.hear_sound):
+				print("Sound made by", player)
+				player.made_sound.connect(perception_component.hear_sound)
+
 	if generate_patrol_points:
 		_generate_patrol_points()
 	
 	var fov = perception_component.get_node("FieldOfView")
-	fov.body_entered.connect(_on_fov_body_entered)
-	fov.body_exited.connect(_on_fov_body_exited)
+	if not fov.body_entered.is_connected(_on_fov_body_entered):
+		fov.body_entered.connect(_on_fov_body_entered)
+	if not fov.body_exited.is_connected(_on_fov_body_exited):
+		fov.body_exited.connect(_on_fov_body_exited)
 	
-	# Pass exported perception values to the PerceptionComponent
 	perception_component.base_perception = base_perception
 	perception_component.line_of_sight_bonus = line_of_sight_bonus
 	perception_component.detection_rate = detection_rate
 	perception_component.reduction_rate = reduction_rate
 	perception_component.max_sound_perception = max_sound_perception
 	
-	# Set attack range radius
 	attack_range.get_node("CollisionShape2D").shape.radius = attack_range_radius
+	
+	# Connect attack range signals
+	if not attack_range.body_entered.is_connected(_on_attack_range_body_entered):
+		attack_range.body_entered.connect(_on_attack_range_body_entered)
+	if not attack_range.body_exited.is_connected(_on_attack_range_body_exited):
+		attack_range.body_exited.connect(_on_attack_range_body_exited)
 
 func _generate_patrol_points():
 	patrol_points.clear()
@@ -139,10 +144,8 @@ func _generate_patrol_points():
 		var result = space_state.intersect_ray(query)
 		
 		if result:
-			# Add a point slightly before the collision point
 			patrol_points.append(result.position - random_direction * 20)
 		else:
-			# Add the point at the full length of the ray
 			patrol_points.append(ray_end)
 
 
@@ -177,32 +180,32 @@ func _physics_process(_delta):
 
 				if player_in_attack_range and can_attack:
 					_set_state(State.ATTACK)
+					print("Attack State!")
 				elif can_attack:
-					if distance_to_player > attack_distance + 5: # Move closer if too far
+					if distance_to_player > attack_distance + 5:
 						last_known_position = _current_target.global_position
 						var direction_to_player = (_current_target.global_position - global_position).normalized()
 						velocity = direction_to_player * speed
 						move_and_slide()
-						_lost_player_timer.stop() # Stop timer if player is in sight
-					elif distance_to_player < attack_distance - 5: # Move away if too close
+						_lost_player_timer.stop()
+					elif distance_to_player < attack_distance - 5:
 						last_known_position = _current_target.global_position
 						var direction_away_from_player = (global_position - _current_target.global_position).normalized()
 						velocity = direction_away_from_player * speed
 						move_and_slide()
-						_lost_player_timer.stop() # Stop timer if player is in sight
-					else: # Within optimal attack distance, stop and wait for cooldown
+						_lost_player_timer.stop()
+					else:
 						velocity = Vector2.ZERO
-						_lost_player_timer.stop() # Stop timer if player is in sight
-				else: # Not can_attack, so stop movement
+						_lost_player_timer.stop()
+				else:
 					velocity = Vector2.ZERO
 			else:
-				# Player lost or invalid, transition to ALERT_LOST_PLAYER
 				_set_state(State.ALERT_LOST_PLAYER)
 				if _lost_player_timer.is_stopped():
-					_lost_player_timer.start(2.0) # Give a short grace period before searching
+					_lost_player_timer.start(2.0)
 				velocity = Vector2.ZERO
 		State.ALERT_LOST_PLAYER:
-			velocity = Vector2.ZERO # Stay put and wait for timer to transition to SEARCHING
+			velocity = Vector2.ZERO
 		State.SEARCHING:
 			var direction_to_last_known = (last_known_position - global_position).normalized()
 			velocity = direction_to_last_known * speed
@@ -246,7 +249,7 @@ func _on_player_detected():
 		return
 	player_detected = true
 	search_timer.stop()
-	_lost_player_timer.stop() # Stop lost player timer if player is re-detected
+	_lost_player_timer.stop()
 	
 	_current_target = perception_component.get_closest_player()
 
@@ -254,7 +257,7 @@ func _on_player_detected():
 		if not _current_target.player_died.is_connected(_on_player_died):
 			_current_target.player_died.connect(_on_player_died)
 		last_known_position = _current_target.global_position
-		_set_state(State.ALERT) # Transition to ALERT state
+		_set_state(State.ALERT)
 
 func _on_player_died():
 	if _current_target and _current_target.player_died.is_connected(_on_player_died):
@@ -263,11 +266,11 @@ func _on_player_died():
 	player_detected = false
 	_set_state(State.SEARCHING)
 	ignore_player_timer.start(5.0)
-	_lost_player_timer.stop() # Stop lost player timer if player dies
+	_lost_player_timer.stop()
 
 func _on_sound_heard(sound_position: Vector2):
 	if current_state == State.ALERT or current_state == State.ATTACK:
-		return # Already in alert/attack state, sound won't change much
+		return
 	
 	last_known_position = sound_position
 	_set_state(State.SEARCHING)
@@ -281,21 +284,19 @@ func _on_sound_heard(sound_position: Vector2):
 func _on_fov_body_entered(body):
 	if body.is_in_group("player"):
 		perception_component.set_player_in_fov(true)
-		# If enemy was searching or looking around, and player is seen, go to ALERT
-		if current_state == State.SEARCHING or current_state == State.LOOKING_AROUND:
-			_set_state(State.ALERT)
-			search_timer.stop()
-			_lost_player_timer.stop()
-
-
+		_current_target = body
+		player_detected = true
+		_set_state(State.ALERT)
+		search_timer.stop()
+		_lost_player_timer.stop()
+			
 func _on_fov_body_exited(body):
 	if body.is_in_group("player"):
 		perception_component.set_player_in_fov(false)
-		# If player was detected and now out of FOV, start lost player timer
 		if player_detected and current_state == State.ALERT:
 			_set_state(State.ALERT_LOST_PLAYER)
 			if _lost_player_timer.is_stopped():
-				_lost_player_timer.start(2.0) # Start timer to transition to SEARCHING
+				_lost_player_timer.start(2.0)
 
 func _on_search_timer_timeout():
 	_set_state(State.IDLE)
@@ -342,7 +343,6 @@ func update_animation():
 		anim_name = "Death"
 	
 	if animated_sprite.animation != anim_name:
-		# Only play if the animation is different, or if it's an attack animation that needs to restart
 		if not (current_state == State.ATTACK and animated_sprite.animation.begins_with("Attack") and animated_sprite.is_playing()):
 			animated_sprite.play(anim_name)
 
@@ -369,8 +369,6 @@ func _on_attack_range_body_exited(body):
 	if body.is_in_group("player"):
 		player_in_attack_range = false
 
-
-
 func _on_attacked_from_direction(attacker_position: Vector2):
 	print("--- Enemy _on_attacked_from_direction ---")
 	print("attacker_position: ", attacker_position)
@@ -386,12 +384,9 @@ func _on_attacked_from_direction(attacker_position: Vector2):
 	elif direction_to_attacker.x < 0:
 		animated_sprite.flip_h = true
 
-	# Don't immediately go to ALERT. Instead, go to SEARCHING.
-	# This makes the enemy investigate the direction of the attack.
-	if current_state != State.ALERT and current_state != State.ATTACK:
-		last_known_position = attacker_position
-		_set_state(State.SEARCHING)
-		player_detected = true
+	last_known_position = attacker_position
+	_set_state(State.SEARCHING)
+	player_detected = true
 
 func _on_player_made_sound(sound_level, sound_position):
 	perception_component.hear_sound(sound_level, sound_position)
@@ -399,12 +394,10 @@ func _on_player_made_sound(sound_level, sound_position):
 func _on_lost_player_timer_timeout():
 	_set_state(State.SEARCHING)
 	player_detected = false
-	_lost_player_timer.stop() # Ensure the timer stops after timeout
+	_lost_player_timer.stop()
 
 func _on_attack_timeout_timer_timeout():
 	_set_state(State.ALERT)
-	# Optionally, you might want to reset attack cooldown here if it wasn't already
-	# attack_cooldown_timer.start(attack_cooldown)
 
 func _on_attack_cooldown_timer_timeout():
 	can_attack = true

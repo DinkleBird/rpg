@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3 uid="uid://bbwuy5qnf1snn"]
 
-[ext_resource type="Script" path="res://ui/EquippedItemsScreen.gd" id="1_abcde"]
+[ext_resource type="Script" uid="uid://bvbcqfk38nkm2" path="res://ui/EquippedItemsScreen.gd" id="1_abcde"]
 [ext_resource type="PackedScene" path="res://ui/ItemSlot.tscn" id="2_fghij"]
-[ext_resource type="Texture2D" path="res://ui/panel_background.png" id="3_jklmn"]
+[ext_resource type="Texture2D" uid="uid://dm0egcynjygli" path="res://ui/panel_background.png" id="3_jklmn"]
+[ext_resource type="Script" uid="uid://bnnahfmw56w33" path="res://ui/ResizeHandle.gd" id="4_kdjfa"]
 
 [node name="EquippedItemsScreen" type="Panel"]
 anchors_preset = 8
@@ -50,7 +51,6 @@ anchor_bottom = 0.5
 offset_left = -32.0
 offset_top = -64.0
 offset_right = 32.0
-offset_bottom = 0.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -92,9 +92,9 @@ anchor_bottom = 0.5
 offset_left = -100.0
 offset_top = -64.0
 offset_right = -36.0
-offset_bottom = 0.0
 grow_horizontal = 2
 grow_vertical = 2
+slot_type = "equipment_weapon"
 
 [node name="ShieldSlot" parent="." instance=ExtResource("2_fghij")]
 layout_mode = 1
@@ -106,6 +106,21 @@ anchor_bottom = 0.5
 offset_left = 36.0
 offset_top = -64.0
 offset_right = 100.0
-offset_bottom = 0.0
 grow_horizontal = 2
 grow_vertical = 2
+slot_type = "equipment_shield"
+
+[node name="ResizeHandle" type="Control" parent="."]
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -40.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 1
+script = ExtResource("4_kdjfa")

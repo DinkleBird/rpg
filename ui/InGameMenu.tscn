@@ -1,0 +1,70 @@
+[gd_scene load_steps=4 format=3 uid="uid://dchq3v3j3v3j"]
+
+[ext_resource type="Script" uid="uid://fro0a7xfjm3u" path="res://ui/InGameMenu.gd" id="1_abcde"]
+[ext_resource type="Texture2D" uid="uid://dm0egcynjygli" path="res://ui/panel_background.png" id="2_fghij"]
+[ext_resource type="Script" uid="uid://bnnahfmw56w33" path="res://ui/ResizeHandle.gd" id="3_83twc"]
+
+[node name="InGameMenu" type="Panel"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_abcde")
+
+[node name="NinePatchRect" type="NinePatchRect" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -50.0
+offset_right = 100.0
+offset_bottom = 50.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_fghij")
+patch_margin_left = 16
+patch_margin_top = 16
+patch_margin_right = 16
+patch_margin_bottom = 16
+
+[node name="VBoxContainer" type="VBoxContainer" parent="NinePatchRect"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -40.0
+offset_top = -20.0
+offset_right = 40.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Title" type="Label" parent="NinePatchRect/VBoxContainer"]
+layout_mode = 2
+text = "Game Menu"
+horizontal_alignment = 1
+
+[node name="ExitButton" type="Button" parent="NinePatchRect/VBoxContainer"]
+layout_mode = 2
+text = "Exit Game"
+
+[node name="ResizeHandle" type="Control" parent="."]
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -40.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 1
+script = ExtResource("3_83twc")
